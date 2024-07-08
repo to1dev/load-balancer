@@ -2,20 +2,30 @@ interface Env {
     api: KVNamespace;
 }
 
+const allowedOrigins = ['https://arc20.me', 'http://localhost:5173'];
 const apiServers = ['https://ep.wizz.cash/proxy', 'https://ep.atomicalmarket.com/proxy'];
+
+function getAllowedOrigin(origin: string | null): string {
+    if (origin && allowedOrigins.includes(origin)) {
+        return origin;
+    }
+    return '';
+}
 
 export default {
     async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
         const url = new URL(request.url);
         const path = url.pathname === '/' ? '' : url.pathname + url.search;
         const cacheKey = `cache:${path}`;
+        const origin = request.headers.get('Origin');
+        const allowedOrigin = getAllowedOrigin(origin);
 
         // 尝试从 KV 获取缓存的数据
         const cachedData = await env.api.get(cacheKey, { type: 'json' });
         if (cachedData) {
             return new Response(JSON.stringify(cachedData), {
                 headers: {
-                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Origin': allowedOrigin,
                     'Content-Type': 'application/json',
                     'Cache-Control': 'public, max-age=600',
                 },
@@ -37,7 +47,7 @@ export default {
 
                     return new Response(JSON.stringify(data), {
                         headers: {
-                            'Access-Control-Allow-Origin': '*',
+                            'Access-Control-Allow-Origin': allowedOrigin,
                             'Content-Type': 'application/json',
                         },
                     });
