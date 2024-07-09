@@ -39,12 +39,13 @@ export async function realmHandler(request: IRequest): Promise<Response> {
 
     if (!_id.id) {
         return Response.json({
-            meta: { v: '', id: '', pid: '', image: '' },
+            meta: { realm: realm, v: '', id: '', pid: '', image: '' },
             profile: null,
         });
     }
 
     return Response.json({
+        realm: realm,
         id: _id.id,
     });
 }
