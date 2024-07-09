@@ -1,15 +1,10 @@
 import { Router } from 'itty-router';
+import { realmHandler } from './api/realm';
 
 const router = Router();
 
-router.get('/api/realm', () => new Response('Realm ready!'));
-
-router.get('/api/realm/:realm', ({ params }) => new Response(`Realm #${params.realm}`));
-
-router.post('/api/realm', async (request) => {
-    const content = await request.json();
-
-    return new Response('Creating Realm: ' + JSON.stringify(content));
+router.get('/api/realm/:realm', async (request) => {
+    return await realmHandler(request);
 });
 
 router.all('*', () => new Response('Not Found.', { status: 404 }));

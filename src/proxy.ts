@@ -46,6 +46,7 @@ export default {
                         headers: {
                             'Access-Control-Allow-Origin': allowedOrigin,
                             'Content-Type': 'application/json',
+                            'X-Indexer': apiServers[randomIndex],
                         },
                     });
                 } else {
