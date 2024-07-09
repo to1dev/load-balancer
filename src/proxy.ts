@@ -1,12 +1,5 @@
-const allowedOrigins = ['https://arc20.me', 'http://localhost:5173'];
-const apiServers = ['https://ep.wizz.cash/proxy', 'https://ep.atomicalmarket.com/proxy'];
-
-function getAllowedOrigin(origin: string | null): string {
-    if (origin && allowedOrigins.includes(origin)) {
-        return origin;
-    }
-    return '';
-}
+import { apiServers } from './consts';
+import { getAllowedOrigin } from './utils';
 
 export default {
     async fetch(request, env, ctx): Promise<Response> {
