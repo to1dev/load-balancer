@@ -140,8 +140,8 @@ export function hexToBase64(hexString: string | null, ext: string | null = 'png'
 }
 
 export interface ParsedHexData {
-    fileName: string;
-    ext: string;
+    fileName?: string | null;
+    ext?: string | null;
     hexData: string;
 }
 
@@ -166,7 +166,7 @@ export function extractHexData(obj: any, parentKey = ''): ParsedHexData[] {
     return result;
 }
 
-async function fetchRealmAtomicalId(request: IRequest, realm: string): Promise<{ id: string | null }> {
+async function fetchRealmAtomicalId(request: IRequest, realm: string): Promise<any | null> {
     const baseUrl = PUBLIC_ELECTRUMX_BASE_URL;
     const endpoint = PUBLIC_ELECTRUMX_ENDPOINT1;
     const url: string = `${baseUrl}${endpoint}?params=["${realm}"]`;
@@ -180,24 +180,28 @@ async function fetchRealmAtomicalId(request: IRequest, realm: string): Promise<{
 
         const data: any = await res.json();
         const id = data.response?.result?.atomical_id;
+        const cid = data.response?.result?.candidates[0]?.atomical_id;
         if (!id) {
+            if (!cid) {
+                return null;
+            }
             return {
                 id: null,
+                cid: cid,
             };
         }
 
         return {
             id,
+            cid,
         };
     } catch (error) {
         console.error('Failed to fetch realm id:', error);
-        return {
-            id: null,
-        };
+        return null;
     }
 }
 
-export async function fetchRealmProfileId(request: IRequest, id: string): Promise<{ pid: string | null }> {
+export async function fetchRealmProfileId(request: IRequest, id: string): Promise<any | null> {
     const baseUrl = PUBLIC_ELECTRUMX_BASE_URL;
     const endpoint = PUBLIC_ELECTRUMX_ENDPOINT2;
     const url: string = `${baseUrl}${endpoint}?params=["${id}",10,0,"mod"]`;
@@ -218,18 +222,14 @@ export async function fetchRealmProfileId(request: IRequest, id: string): Promis
             }
         }
 
-        return {
-            pid: null,
-        };
+        return null;
     } catch (error) {
         console.error('Failed to fetch realm info:', error);
-        return {
-            pid: null,
-        };
+        return null;
     }
 }
 
-export async function fetchRealmProfile(request: IRequest, id: string): Promise<{ profile: any | null }> {
+export async function fetchRealmProfile(request: IRequest, id: string): Promise<any | null> {
     const baseUrl = PUBLIC_ELECTRUMX_BASE_URL;
     const endpoint = PUBLIC_ELECTRUMX_ENDPOINT3;
     const url: string = `${baseUrl}${endpoint}?params=["${id}"]`;
@@ -244,20 +244,16 @@ export async function fetchRealmProfile(request: IRequest, id: string): Promise<
         const data: any = await res.json();
         const profile = await findObjectWithKey(data.response?.result?.mint_data?.fields, 'v');
 
-        return {
-            profile: profile ? profile : null,
-        };
+        return profile ? { profile } : null;
     } catch (error) {
         console.error('Failed to fetch realm info:', error);
-        return {
-            profile: null,
-        };
+        return null;
     }
 }
 
 interface ImageData {
-    ext: string | null;
-    data: string | null;
+    ext?: string | null;
+    data?: string | null;
 }
 
 export async function fetchHexData(id: string | null | undefined): Promise<ImageData | null> {
@@ -277,21 +273,15 @@ export async function fetchHexData(id: string | null | undefined): Promise<Image
         if (imageData && imageData.length > 0) {
             const image = imageData[0];
             return {
-                ext: image.ext,
-                data: image.hexData,
+                ext: image?.ext,
+                data: image?.hexData,
             };
         }
 
-        return {
-            ext: null,
-            data: null,
-        };
+        return null;
     } catch (error) {
         console.error('Failed to fetch hex data:', error);
-        return {
-            ext: null,
-            data: null,
-        };
+        return null;
     }
 }
 
@@ -308,25 +298,32 @@ export async function realmHandler(request: IRequest): Promise<Response> {
     const realm = request.params.realm;
     const _id = await fetchRealmAtomicalId(request, realm);
 
-    if (!_id.id) {
+    if (!_id?.id) {
+        if (!_id?.cid) {
+            return packResponse({
+                meta: { v: '', id: '', cid: '', pid: '', image: '' },
+                profile: null,
+            });
+        }
+
         return packResponse({
-            meta: { v: '', id: '', pid: '', image: '' },
+            meta: { v: '', id: '', cid: _id.cid, pid: '', image: '' },
             profile: null,
         });
     }
 
     const pid = await fetchRealmProfileId(request, _id.id);
-    if (!pid.pid) {
+    if (!pid?.pid) {
         return packResponse({
-            meta: { v: '', id: _id.id, pid: '', image: '' },
+            meta: { v: '', id: _id.id, cid: _id.cid, pid: '', image: '' },
             profile: null,
         });
     }
 
     const _profile = await fetchRealmProfile(request, pid.pid);
-    if (!_profile.profile) {
+    if (!_profile?.profile) {
         return packResponse({
-            meta: { v: '', id: _id.id, pid: pid.pid, image: '' },
+            meta: { v: '', id: _id.id, cid: _id.cid, pid: pid.pid, image: '' },
             profile: null,
         });
     }
@@ -335,9 +332,10 @@ export async function realmHandler(request: IRequest): Promise<Response> {
         meta: {
             v: _profile.profile?.v,
             id: _id.id,
+            cid: _id.cid,
             pid: pid.pid,
-            image: _profile.profile?.image ? (_profile.profile?.image as string) : (_profile.profile?.i as string),
+            image: _profile?.profile?.image ? (_profile?.profile?.image as string) : (_profile?.profile?.i as string),
         },
-        profile: _profile.profile,
+        profile: _profile?.profile,
     });
 }
