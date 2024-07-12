@@ -6,3 +6,12 @@ export function getAllowedOrigin(origin: string | null): string {
     }
     return '';
 }
+
+export function packResponse(data: any): Response {
+    return new Response(JSON.stringify(data), {
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json',
+        },
+    });
+}

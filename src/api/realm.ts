@@ -1,5 +1,5 @@
 import { PUBLIC_ELECTRUMX_BASE_URL, PUBLIC_ELECTRUMX_ENDPOINT1, PUBLIC_ELECTRUMX_ENDPOINT2, PUBLIC_ELECTRUMX_ENDPOINT3 } from '../consts';
-import { getAllowedOrigin } from '../utils';
+import { getAllowedOrigin, packResponse } from '../utils';
 import { IRequest } from 'itty-router';
 import { base64, hex } from '@scure/base';
 
@@ -283,15 +283,6 @@ export async function fetchHexData(id: string | null | undefined): Promise<Image
         console.error('Failed to fetch hex data:', error);
         return null;
     }
-}
-
-function packResponse(data: any): Response {
-    return new Response(JSON.stringify(data), {
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Content-Type': 'application/json',
-        },
-    });
 }
 
 export async function realmHandler(request: IRequest): Promise<Response> {
