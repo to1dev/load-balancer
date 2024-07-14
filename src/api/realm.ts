@@ -232,7 +232,7 @@ export async function fetchRealmProfileId(request: IRequest, id: string): Promis
 
         return null;
     } catch (error) {
-        console.error('Failed to fetch realm info:', error);
+        console.error('Failed to fetch realm profile id:', error);
         return null;
     }
 }
@@ -285,7 +285,7 @@ export async function fetchRealmProfile(request: IRequest, id: string): Promise<
             owner: parsedAddress,
         };
     } catch (error) {
-        console.error('Failed to fetch realm info:', error);
+        console.error('Failed to fetch realm profile:', error);
         return null;
     }
 }
