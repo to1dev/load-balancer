@@ -2,6 +2,7 @@ import { PUBLIC_ELECTRUMX_BASE_URL, PUBLIC_ELECTRUMX_ENDPOINT1, PUBLIC_ELECTRUMX
 import { getAllowedOrigin, packResponse } from '../utils';
 import { IRequest } from 'itty-router';
 import { base64, hex } from '@scure/base';
+import * as btc from '@scure/btc-signer';
 
 interface JsonData {
     [key: string]: any;
@@ -179,6 +180,10 @@ async function fetchRealmAtomicalId(request: IRequest, realm: string): Promise<a
         }
 
         const data: any = await res.json();
+        if (!data) {
+            return null;
+        }
+
         const id = data.response?.result?.atomical_id;
         const cid = data.response?.result?.candidates[0]?.atomical_id;
         if (!id) {
@@ -214,6 +219,9 @@ export async function fetchRealmProfileId(request: IRequest, id: string): Promis
         }
 
         const data: any = await res.json();
+        if (!data) {
+            return null;
+        }
 
         if (Array.isArray(data.response?.result) && data.response.result.length > 0) {
             const pid = await findFirstDKeyValue(data.response.result);
@@ -242,9 +250,40 @@ export async function fetchRealmProfile(request: IRequest, id: string): Promise<
         }
 
         const data: any = await res.json();
+        if (!data) {
+            return null;
+        }
+
         const profile = await findObjectWithKey(data.response?.result?.mint_data?.fields, 'v');
 
-        return profile ? { profile } : null;
+        if (!profile) {
+            return null;
+        }
+
+        const hexScript = data.response?.result?.mint_info?.reveal_location_script;
+        if (!hexScript) {
+            return {
+                profile: profile,
+                owner: null,
+            };
+        }
+
+        const mainnet = {
+            bech32: 'bc',
+            pubKeyHash: 0x00,
+            scriptHash: 0x05,
+            wif: 0x80,
+        };
+
+        const addr = btc.Address(mainnet);
+        const script = hex.decode(hexScript);
+        const parsedScript = btc.OutScript.decode(script);
+        const parsedAddress = addr.encode(parsedScript);
+
+        return {
+            profile: profile,
+            owner: parsedAddress,
+        };
     } catch (error) {
         console.error('Failed to fetch realm info:', error);
         return null;
@@ -268,6 +307,10 @@ export async function fetchHexData(id: string | null | undefined): Promise<Image
         }
 
         const data: any = await res.json();
+        if (!data) {
+            return null;
+        }
+
         const imageData = extractHexData(data.response?.result?.mint_data);
 
         if (imageData && imageData.length > 0) {
