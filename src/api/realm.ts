@@ -1,5 +1,5 @@
 import { PUBLIC_ELECTRUMX_BASE_URL, PUBLIC_ELECTRUMX_ENDPOINT1, PUBLIC_ELECTRUMX_ENDPOINT2, PUBLIC_ELECTRUMX_ENDPOINT3 } from '../consts';
-import { findFirstDKeyValue, findObjectWithKey, extractHexData, scriptAddress, packResponse } from '../utils';
+import { findFirstDKeyValue, findObjectWithKey, extractHexData, scriptAddress, packResponse, sendQueue } from '../utils';
 import { IRequest } from 'itty-router';
 
 async function fetchRealmAtomicalId(request: IRequest, realm: string): Promise<any | null> {
@@ -154,8 +154,15 @@ export async function fetchHexData(id: string | null | undefined): Promise<Image
 
 export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionContext): Promise<Response> {
     const realm = request.params.realm;
-    const _id = await fetchRealmAtomicalId(request, realm);
 
+    // D1
+    // KV
+
+    // Queue
+    await sendQueue(realm);
+
+    // API
+    const _id = await fetchRealmAtomicalId(request, realm);
     if (!_id?.id) {
         if (!_id?.cid) {
             return packResponse({
