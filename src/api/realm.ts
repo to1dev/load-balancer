@@ -1,5 +1,5 @@
 import { PUBLIC_ELECTRUMX_BASE_URL, PUBLIC_ELECTRUMX_ENDPOINT1, PUBLIC_ELECTRUMX_ENDPOINT2, PUBLIC_ELECTRUMX_ENDPOINT3 } from '../consts';
-import { findFirstDKeyValue, findObjectWithKey, extractHexData, scriptAddress } from '../utils';
+import { findFirstDKeyValue, findObjectWithKey, extractHexData, scriptAddress, packResponse } from '../utils';
 import { IRequest } from 'itty-router';
 
 async function fetchRealmAtomicalId(request: IRequest, realm: string): Promise<any | null> {
@@ -152,41 +152,41 @@ export async function fetchHexData(id: string | null | undefined): Promise<Image
     }
 }
 
-export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionContext): Promise<any> {
+export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionContext): Promise<Response> {
     const realm = request.params.realm;
     const _id = await fetchRealmAtomicalId(request, realm);
 
     if (!_id?.id) {
         if (!_id?.cid) {
-            return {
+            return packResponse({
                 meta: { v: '', id: '', cid: '', pid: '', image: '' },
                 profile: null,
-            };
+            });
         }
 
-        return {
+        return packResponse({
             meta: { v: '', id: '', cid: _id.cid, pid: '', image: '' },
             profile: null,
-        };
+        });
     }
 
     const pid = await fetchRealmProfileId(request, _id.id);
     if (!pid?.pid) {
-        return {
+        return packResponse({
             meta: { v: '', id: _id.id, cid: _id.cid, pid: '', image: '' },
             profile: null,
-        };
+        });
     }
 
     const _profile = await fetchRealmProfile(request, pid.pid);
     if (!_profile?.profile) {
-        return {
+        return packResponse({
             meta: { v: '', id: _id.id, cid: _id.cid, pid: pid.pid, image: '' },
             profile: null,
-        };
+        });
     }
 
-    return {
+    return packResponse({
         meta: {
             v: _profile.profile?.v,
             id: _id.id,
@@ -195,5 +195,5 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             image: _profile?.profile?.image ? (_profile?.profile?.image as string) : (_profile?.profile?.i as string),
         },
         profile: _profile?.profile,
-    };
+    });
 }
