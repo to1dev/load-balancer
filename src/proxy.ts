@@ -1,5 +1,5 @@
 import { apiServers } from './consts';
-import { getAllowedOrigin } from './utils';
+import { getAllowedOrigin, sendQueue } from './utils';
 
 export default {
     async fetch(request, env, ctx): Promise<Response> {
