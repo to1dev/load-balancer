@@ -229,7 +229,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     let image = profile?.profile?.image ? profile?.profile?.image : profile?.profile?.i;
     const iid = parseAtomicalIdfromURN(image);
     if (iid?.id) {
-        const cachedImage = await env.MY_BUCKET.get(`images/${iid?.id}`);
+        const cachedImage = await env.MY_BUCKET.head(`images/${iid?.id}`);
         if (cachedImage) {
             image = `https://pub-c9a0c4328c9b4f398c49480ecf96c412.r2.dev/images/${iid?.id}`;
         } else {
