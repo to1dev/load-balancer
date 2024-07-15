@@ -2,4 +2,6 @@
 // After adding bindings to `wrangler.toml`, regenerate this interface via `npm run cf-typegen`
 interface Env {
     api: KVNamespace;
+    MY_DB: D1Database;
+    MY_BUCKET: R2Bucket;
 }

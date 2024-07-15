@@ -135,6 +135,18 @@ export function hexToBase64(hexString: string | null, ext: string | null = 'png'
     return `data:image/${ext};base64,${b64}`;
 }
 
+export function hexToBytes(hexString: string | null, ext: string | null = 'png'): Uint8Array | null {
+    if (!hexString) {
+        return null;
+    }
+    const bytes = hex.decode(hexString);
+    if (!bytes) {
+        return null;
+    }
+
+    return bytes;
+}
+
 interface ParsedHexData {
     fileName: string | null;
     ext: string | null;
