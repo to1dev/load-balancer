@@ -239,7 +239,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
                 const bytes = hexToBytes(hexImage.data, hexImage.ext);
                 if (bytes) {
-                    await env.MY_BUCKET.put(`images/${iid?.id}.${hexImage.ext}`, bytes.buffer, {
+                    await env.MY_BUCKET.put(`images/${iid?.id}`, bytes.buffer, {
                         httpMetadata: {
                             contentType: `image/${hexImage.ext}`,
                         },
