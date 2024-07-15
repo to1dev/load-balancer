@@ -226,20 +226,25 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     }
 
     let imageData: string | null = null;
-    const image = profile?.profile?.image ? profile?.profile?.image : profile?.profile?.i;
+    let image = profile?.profile?.image ? profile?.profile?.image : profile?.profile?.i;
     const iid = parseAtomicalIdfromURN(image);
     if (iid?.id) {
-        const hexImage = await fetchHexData(request, iid.id);
-        if (hexImage) {
-            imageData = hexToBase64(hexImage.data, hexImage.ext);
+        const cachedImage = await env.MY_BUCKET.get(`images/${iid?.id}`);
+        if (cachedImage) {
+            image = `https://pub-c9a0c4328c9b4f398c49480ecf96c412.r2.dev/images/${iid?.id}`;
+        } else {
+            const hexImage = await fetchHexData(request, iid.id);
+            if (hexImage) {
+                imageData = hexToBase64(hexImage.data, hexImage.ext);
 
-            const bytes = hexToBytes(hexImage.data, hexImage.ext);
-            if (bytes) {
-                await env.MY_BUCKET.put(`images/${iid?.id}.${hexImage.ext}`, bytes.buffer, {
-                    httpMetadata: {
-                        contentType: `image/${hexImage.ext}`,
-                    },
-                });
+                const bytes = hexToBytes(hexImage.data, hexImage.ext);
+                if (bytes) {
+                    await env.MY_BUCKET.put(`images/${iid?.id}.${hexImage.ext}`, bytes.buffer, {
+                        httpMetadata: {
+                            contentType: `image/${hexImage.ext}`,
+                        },
+                    });
+                }
             }
         }
     }
