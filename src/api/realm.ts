@@ -169,13 +169,20 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     if (!id?.id) {
         if (!id?.cid) {
             return packResponse({
-                meta: { v: '', id: '', cid: '', pid: '', image: '' },
+                meta: null,
                 profile: null,
             });
         }
 
         return packResponse({
-            meta: { v: '', id: '', cid: id.cid, pid: '', image: '' },
+            meta: {
+                v: null,
+                id: null,
+                cid: id.cid,
+                pid: null,
+                po: null,
+                image: null,
+            },
             profile: null,
         });
     }
@@ -183,7 +190,14 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     const pid = await fetchRealmProfileId(request, id.id);
     if (!pid?.pid) {
         return packResponse({
-            meta: { v: '', id: id.id, cid: id.cid, pid: '', image: '' },
+            meta: {
+                v: null,
+                id: id.id,
+                cid: id.cid,
+                pid: null,
+                po: null,
+                image: null,
+            },
             profile: null,
         });
     }
@@ -191,7 +205,14 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     const profile = await fetchRealmProfile(request, pid.pid);
     if (!profile?.profile) {
         return packResponse({
-            meta: { v: '', id: id.id, cid: id.cid, pid: pid.pid, image: '' },
+            meta: {
+                v: null,
+                id: id.id,
+                cid: id.cid,
+                pid: pid.pid,
+                po: null,
+                image: null,
+            },
             profile: null,
         });
     }
@@ -212,6 +233,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             id: id.id,
             cid: id.cid,
             pid: pid.pid,
+            po: profile?.owner,
             image: image,
             imageData: imageData,
         },
