@@ -135,8 +135,8 @@ export function hexToBase64(hexString: string | null, ext: string | null = 'png'
 }
 
 interface ParsedHexData {
-    fileName?: string | null;
-    ext?: string | null;
+    fileName: string | null;
+    ext: string | null;
     hexData: string;
 }
 
