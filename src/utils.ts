@@ -1,4 +1,5 @@
 import { PUBLIC_SEQUENCE_BASE_URL, allowedOrigins, apiServers } from './consts';
+import { IRequest } from 'itty-router';
 import { base64, hex } from '@scure/base';
 import * as btc from '@scure/btc-signer';
 
@@ -182,20 +183,20 @@ const mainnet = {
     wif: 0x80,
 };
 
-export async function fetchApiServer(request: Request): Promise<any> {
+export async function fetchApiServer(request: IRequest, path: string): Promise<any> {
     /*const url = new URL(request.url);
     let path = url.pathname.replace(/^\/proxy/, '');
     if (url.search) {
         path += url.search;
     }*/
 
-    const url = new URL(request.url);
+    /*const url = new URL(request.url);
     const pathname = url.pathname + url.search;
-    const path = url.pathname === '/' ? '' : url.pathname + url.search;
+    const path = url.pathname === '/' ? '' : url.pathname + url.search;*/
 
     for (let i = 0; i < apiServers.length; i++) {
         const randomIndex = Math.floor(Math.random() * apiServers.length);
-        const apiUrl = `${apiServers[randomIndex]}${path}`;
+        const apiUrl = `${apiServers[randomIndex]}/${path}`;
         const newRequest = new Request(apiUrl, request);
 
         try {

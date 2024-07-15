@@ -1,6 +1,5 @@
-import { PUBLIC_ELECTRUMX_BASE_URL, PUBLIC_ELECTRUMX_ENDPOINT1, PUBLIC_ELECTRUMX_ENDPOINT2, PUBLIC_ELECTRUMX_ENDPOINT3 } from '../consts';
+import { PUBLIC_ELECTRUMX_ENDPOINT1, PUBLIC_ELECTRUMX_ENDPOINT2, PUBLIC_ELECTRUMX_ENDPOINT3 } from '../consts';
 import {
-    createHeaders,
     findFirstDKeyValue,
     findObjectWithKey,
     parseAtomicalIdfromURN,
@@ -14,13 +13,11 @@ import {
 import { IRequest } from 'itty-router';
 
 async function fetchRealmAtomicalId(request: IRequest, realm: string): Promise<any | null> {
-    const baseUrl = PUBLIC_ELECTRUMX_BASE_URL;
     const endpoint = PUBLIC_ELECTRUMX_ENDPOINT1;
-    const url: string = `${baseUrl}${endpoint}?params=["${realm}"]`;
-    const newRequest = new Request(url, request);
+    const path: string = `${endpoint}?params=["${realm}"]`;
 
     try {
-        const res = await fetchApiServer(newRequest);
+        const res = await fetchApiServer(request, path);
         if (!res.ok) {
             throw new Error(`Error fetching data: ${res.statusText}`);
         }
@@ -53,13 +50,11 @@ async function fetchRealmAtomicalId(request: IRequest, realm: string): Promise<a
 }
 
 export async function fetchRealmProfileId(request: IRequest, id: string): Promise<any | null> {
-    const baseUrl = PUBLIC_ELECTRUMX_BASE_URL;
     const endpoint = PUBLIC_ELECTRUMX_ENDPOINT2;
-    const url: string = `${baseUrl}${endpoint}?params=["${id}",10,0,"mod"]`;
-    const newRequest = new Request(url, request);
+    const path: string = `${endpoint}?params=["${id}",10,0,"mod"]`;
 
     try {
-        const res = await fetchApiServer(newRequest);
+        const res = await fetchApiServer(request, path);
         if (!res.ok) {
             throw new Error(`Error fetching data: ${res.statusText}`);
         }
@@ -84,13 +79,11 @@ export async function fetchRealmProfileId(request: IRequest, id: string): Promis
 }
 
 export async function fetchRealmProfile(request: IRequest, id: string): Promise<any | null> {
-    const baseUrl = PUBLIC_ELECTRUMX_BASE_URL;
     const endpoint = PUBLIC_ELECTRUMX_ENDPOINT3;
-    const url: string = `${baseUrl}${endpoint}?params=["${id}"]`;
-    const newRequest = new Request(url, request);
+    const path: string = `${endpoint}?params=["${id}"]`;
 
     try {
-        const res = await fetchApiServer(newRequest);
+        const res = await fetchApiServer(request, path);
         if (!res.ok) {
             throw new Error(`Error fetching data: ${res.statusText}`);
         }
@@ -130,18 +123,12 @@ interface ImageData {
     data: string | null;
 }
 
-async function fetchHexData(id: string | null | undefined): Promise<ImageData | null> {
-    const baseUrl = PUBLIC_ELECTRUMX_BASE_URL;
+async function fetchHexData(request: IRequest, id: string | null | undefined): Promise<ImageData | null> {
     const endpoint = PUBLIC_ELECTRUMX_ENDPOINT3;
-    const url: string = `${baseUrl}${endpoint}?params=["${id}"]`;
-    const headers = createHeaders();
-    const newRequest = new Request(url, {
-        method: 'GET',
-        headers: headers,
-    });
+    const path: string = `${endpoint}?params=["${id}"]`;
 
     try {
-        const res = await fetchApiServer(newRequest);
+        const res = await fetchApiServer(request, path);
         if (!res.ok) {
             throw new Error(`Error fetching data: ${res.statusText}`);
         }
@@ -213,7 +200,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     const image = profile?.profile?.image ? profile?.profile?.image : profile?.profile?.i;
     const iid = parseAtomicalIdfromURN(image);
     if (iid?.id) {
-        const hexImage = await fetchHexData(iid.id);
+        const hexImage = await fetchHexData(request, iid.id);
         if (hexImage) {
             imageData = hexToBase64(hexImage.data, hexImage.ext);
         }
