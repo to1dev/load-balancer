@@ -162,7 +162,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     // KV
 
     // Queue
-    await sendQueue(realm);
+    //await sendQueue(realm);
 
     // API
     const id = await fetchRealmAtomicalId(request, realm);
