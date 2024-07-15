@@ -1,6 +1,16 @@
-import { PUBLIC_SEQUENCE_BASE_URL, allowedOrigins } from './consts';
+import { PUBLIC_SEQUENCE_BASE_URL, allowedOrigins, apiServers } from './consts';
 import { base64, hex } from '@scure/base';
 import * as btc from '@scure/btc-signer';
+
+export function createHeaders(): Headers {
+    return new Headers({
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        Accept: 'application/json, text/plain, */*',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-US,en;q=0.9',
+        Connection: 'keep-alive',
+    });
+}
 
 interface JsonData {
     [key: string]: any;
@@ -78,7 +88,7 @@ const removeDuplicatePrefixes = (line: string): string => {
     return result.join(':');
 };
 
-const parseAtomicalIdfromURN = (line: string): ParsedId => {
+export const parseAtomicalIdfromURN = (line: string): ParsedId => {
     const correctedLine = removeDuplicatePrefixes(line);
     const parts = correctedLine.split(':');
 
@@ -115,7 +125,7 @@ const parseAtomicalIdfromURN = (line: string): ParsedId => {
     };
 };
 
-function hexToBase64(hexString: string | null, ext: string | null = 'png'): string | null {
+export function hexToBase64(hexString: string | null, ext: string | null = 'png'): string | null {
     if (!hexString) {
         return null;
     }
@@ -171,6 +181,37 @@ const mainnet = {
     scriptHash: 0x05,
     wif: 0x80,
 };
+
+export async function fetchApiServer(request: Request): Promise<any> {
+    /*const url = new URL(request.url);
+    let path = url.pathname.replace(/^\/proxy/, '');
+    if (url.search) {
+        path += url.search;
+    }*/
+
+    const url = new URL(request.url);
+    const pathname = url.pathname + url.search;
+    const path = url.pathname === '/' ? '' : url.pathname + url.search;
+
+    for (let i = 0; i < apiServers.length; i++) {
+        const randomIndex = Math.floor(Math.random() * apiServers.length);
+        const apiUrl = `${apiServers[randomIndex]}${path}`;
+        const newRequest = new Request(apiUrl, request);
+
+        try {
+            const response = await fetch(newRequest);
+            if (response.ok) {
+                return response;
+            } else {
+                console.warn(`Server ${apiUrl} responded with status ${response.status}`);
+            }
+        } catch (error) {
+            console.error(`Error fetching from ${apiUrl}:`, error);
+        }
+    }
+
+    return new Response('All API servers are unavailable', { status: 503 });
+}
 
 export function scriptAddress(hexScript: string): string | null {
     if (!hexScript) {

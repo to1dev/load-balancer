@@ -1,5 +1,16 @@
 import { PUBLIC_ELECTRUMX_BASE_URL, PUBLIC_ELECTRUMX_ENDPOINT1, PUBLIC_ELECTRUMX_ENDPOINT2, PUBLIC_ELECTRUMX_ENDPOINT3 } from '../consts';
-import { findFirstDKeyValue, findObjectWithKey, extractHexData, scriptAddress, packResponse, sendQueue } from '../utils';
+import {
+    createHeaders,
+    findFirstDKeyValue,
+    findObjectWithKey,
+    parseAtomicalIdfromURN,
+    hexToBase64,
+    extractHexData,
+    fetchApiServer,
+    scriptAddress,
+    packResponse,
+    sendQueue,
+} from '../utils';
 import { IRequest } from 'itty-router';
 
 async function fetchRealmAtomicalId(request: IRequest, realm: string): Promise<any | null> {
@@ -9,7 +20,7 @@ async function fetchRealmAtomicalId(request: IRequest, realm: string): Promise<a
     const newRequest = new Request(url, request);
 
     try {
-        const res = await fetch(newRequest);
+        const res = await fetchApiServer(newRequest);
         if (!res.ok) {
             throw new Error(`Error fetching data: ${res.statusText}`);
         }
@@ -48,7 +59,7 @@ export async function fetchRealmProfileId(request: IRequest, id: string): Promis
     const newRequest = new Request(url, request);
 
     try {
-        const res = await fetch(newRequest);
+        const res = await fetchApiServer(newRequest);
         if (!res.ok) {
             throw new Error(`Error fetching data: ${res.statusText}`);
         }
@@ -79,7 +90,7 @@ export async function fetchRealmProfile(request: IRequest, id: string): Promise<
     const newRequest = new Request(url, request);
 
     try {
-        const res = await fetch(newRequest);
+        const res = await fetchApiServer(newRequest);
         if (!res.ok) {
             throw new Error(`Error fetching data: ${res.statusText}`);
         }
@@ -115,17 +126,22 @@ export async function fetchRealmProfile(request: IRequest, id: string): Promise<
 }
 
 interface ImageData {
-    ext?: string | null;
-    data?: string | null;
+    ext: string | null;
+    data: string | null;
 }
 
-export async function fetchHexData(id: string | null | undefined): Promise<ImageData | null> {
+async function fetchHexData(id: string | null | undefined): Promise<ImageData | null> {
     const baseUrl = PUBLIC_ELECTRUMX_BASE_URL;
     const endpoint = PUBLIC_ELECTRUMX_ENDPOINT3;
     const url: string = `${baseUrl}${endpoint}?params=["${id}"]`;
+    const headers = createHeaders();
+    const newRequest = new Request(url, {
+        method: 'GET',
+        headers: headers,
+    });
 
     try {
-        const res = await fetch(url);
+        const res = await fetchApiServer(newRequest);
         if (!res.ok) {
             throw new Error(`Error fetching data: ${res.statusText}`);
         }
@@ -162,9 +178,9 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     await sendQueue(realm);
 
     // API
-    const _id = await fetchRealmAtomicalId(request, realm);
-    if (!_id?.id) {
-        if (!_id?.cid) {
+    const id = await fetchRealmAtomicalId(request, realm);
+    if (!id?.id) {
+        if (!id?.cid) {
             return packResponse({
                 meta: { v: '', id: '', cid: '', pid: '', image: '' },
                 profile: null,
@@ -172,35 +188,46 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         }
 
         return packResponse({
-            meta: { v: '', id: '', cid: _id.cid, pid: '', image: '' },
+            meta: { v: '', id: '', cid: id.cid, pid: '', image: '' },
             profile: null,
         });
     }
 
-    const pid = await fetchRealmProfileId(request, _id.id);
+    const pid = await fetchRealmProfileId(request, id.id);
     if (!pid?.pid) {
         return packResponse({
-            meta: { v: '', id: _id.id, cid: _id.cid, pid: '', image: '' },
+            meta: { v: '', id: id.id, cid: id.cid, pid: '', image: '' },
             profile: null,
         });
     }
 
-    const _profile = await fetchRealmProfile(request, pid.pid);
-    if (!_profile?.profile) {
+    const profile = await fetchRealmProfile(request, pid.pid);
+    if (!profile?.profile) {
         return packResponse({
-            meta: { v: '', id: _id.id, cid: _id.cid, pid: pid.pid, image: '' },
+            meta: { v: '', id: id.id, cid: id.cid, pid: pid.pid, image: '' },
             profile: null,
         });
+    }
+
+    let imageData: string | null = null;
+    const image = profile?.profile?.image ? profile?.profile?.image : profile?.profile?.i;
+    const iid = parseAtomicalIdfromURN(image);
+    if (iid?.id) {
+        const hexImage = await fetchHexData(iid.id);
+        if (hexImage) {
+            imageData = hexToBase64(hexImage.data, hexImage.ext);
+        }
     }
 
     return packResponse({
         meta: {
-            v: _profile.profile?.v,
-            id: _id.id,
-            cid: _id.cid,
+            v: profile.profile?.v,
+            id: id.id,
+            cid: id.cid,
             pid: pid.pid,
-            image: _profile?.profile?.image ? (_profile?.profile?.image as string) : (_profile?.profile?.i as string),
+            image: image,
+            imageData: imageData,
         },
-        profile: _profile?.profile,
+        profile: profile?.profile,
     });
 }
