@@ -169,7 +169,14 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     if (!id?.id) {
         if (!id?.cid) {
             return packResponse({
-                meta: null,
+                meta: {
+                    v: null,
+                    id: null,
+                    cid: null,
+                    pid: null,
+                    po: null,
+                    image: null,
+                },
                 profile: null,
             });
         }
