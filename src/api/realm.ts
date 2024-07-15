@@ -231,7 +231,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     if (iid?.id) {
         const cachedImage = await env.MY_BUCKET.head(`images/${iid?.id}`);
         if (cachedImage) {
-            image = `https://pub-c9a0c4328c9b4f398c49480ecf96c412.r2.dev/images/${iid?.id}`;
+            image = `https://r2.arc20.me/images/${iid?.id}`;
         } else {
             const hexImage = await fetchHexData(request, iid.id);
             if (hexImage) {
