@@ -4,16 +4,14 @@ import {
     findObjectWithKey,
     parseAtomicalIdfromURN,
     hexToBase64,
+    urlToHash,
+    imageToR2,
     extractHexData,
     fetchApiServer,
     scriptAddress,
     packResponse,
-    sendQueue,
-    hexToBytes,
 } from '../utils';
 import { IRequest } from 'itty-router';
-import { blake3 } from '@noble/hashes/blake3';
-import { bytesToHex, randomBytes } from '@noble/hashes/utils';
 
 async function fetchRealmAtomicalId(request: IRequest, realm: string): Promise<any | null> {
     const endpoint = PUBLIC_ELECTRUMX_ENDPOINT1;
@@ -227,14 +225,28 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         });
     }
 
+    let image = profile?.profile?.image ? profile?.profile?.image : profile?.profile?.i;
+    if (!image) {
+        return packResponse({
+            meta: {
+                v: null,
+                id: id.id,
+                cid: id.cid,
+                pid: pid.pid,
+                po: profile?.owner,
+                image: null,
+            },
+            profile: profile?.profile,
+        });
+    }
+
+    const url = PUBLIC_R2_BASE_URL;
     let imageData: string | null = null;
     let imageHash: string | null = null;
-    let image = profile?.profile?.image ? profile?.profile?.image : profile?.profile?.i;
     const iid = parseAtomicalIdfromURN(image);
     if (iid?.id) {
         const cachedImage = await env.MY_BUCKET.head(`images/${iid?.id}`);
         if (cachedImage) {
-            const url = PUBLIC_R2_BASE_URL;
             image = `${url}${iid?.id}`;
         } else {
             const hexImage = await fetchHexData(request, iid?.id);
@@ -243,7 +255,16 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             }
         }
     } else {
-        imageHash = bytesToHex(blake3(image));
+        const imageHash = urlToHash(image);
+        const cachedImage = await env.MY_BUCKET.head(`images/${imageHash}`);
+        if (cachedImage) {
+            image = `${url}${imageHash}`;
+        } else {
+            const imageHash = imageToR2(env, image);
+            if (imageHash) {
+                image = `${url}${imageHash}`;
+            }
+        }
     }
 
     return packResponse({

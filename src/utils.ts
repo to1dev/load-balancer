@@ -2,6 +2,8 @@ import { PUBLIC_SEQUENCE_BASE_URL, allowedOrigins, apiServers } from './consts';
 import { IRequest } from 'itty-router';
 import { base64, hex } from '@scure/base';
 import * as btc from '@scure/btc-signer';
+import { blake3 } from '@noble/hashes/blake3';
+import { bytesToHex, randomBytes } from '@noble/hashes/utils';
 
 export function createHeaders(): Headers {
     return new Headers({
@@ -89,7 +91,7 @@ const removeDuplicatePrefixes = (line: string): string => {
     return result.join(':');
 };
 
-export const parseAtomicalIdfromURN = (line: string): ParsedId => {
+export const parseAtomicalIdfromURN = (line: string): ParsedId | null => {
     const correctedLine = removeDuplicatePrefixes(line);
     const parts = correctedLine.split(':');
 
@@ -118,12 +120,7 @@ export const parseAtomicalIdfromURN = (line: string): ParsedId => {
         }*/
     }
 
-    return {
-        prefix: null,
-        protocol: null,
-        type: null,
-        id: null,
-    };
+    return null;
 };
 
 export async function hexToBase64(
@@ -150,16 +147,22 @@ export async function hexToBase64(
     return `data:image/${ext};base64,${b64}`;
 }
 
-export function hexToBytes(hexString: string | null, ext: string | null = 'png'): Uint8Array | null {
-    if (!hexString) {
-        return null;
-    }
-    const bytes = hex.decode(hexString);
-    if (!bytes) {
-        return null;
+export function urlToHash(url: string): string {
+    return bytesToHex(blake3(url));
+}
+
+export async function imageToR2(env: Env, image: string): Promise<string | null> {
+    let imageHash: string | null = null;
+    const imageResponse = await fetch(image);
+    if (imageResponse.ok) {
+        const imageBytes = await imageResponse.arrayBuffer();
+        if (imageBytes) {
+            imageHash = urlToHash(image);
+            await env.MY_BUCKET.put(`images/${imageHash}`, imageBytes);
+        }
     }
 
-    return bytes;
+    return imageHash;
 }
 
 interface ParsedHexData {
