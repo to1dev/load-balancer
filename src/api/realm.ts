@@ -1,4 +1,10 @@
-import { PUBLIC_ELECTRUMX_ENDPOINT1, PUBLIC_ELECTRUMX_ENDPOINT2, PUBLIC_ELECTRUMX_ENDPOINT3, PUBLIC_R2_BASE_URL } from '../consts';
+import {
+    PUBLIC_ELECTRUMX_ENDPOINT1,
+    PUBLIC_ELECTRUMX_ENDPOINT2,
+    PUBLIC_ELECTRUMX_ENDPOINT3,
+    PUBLIC_R2_BASE_URL,
+    PUBLIC_R2_BASE_URL_DOMAIN,
+} from '../consts';
 import {
     findFirstDKeyValue,
     findObjectWithKey,
@@ -255,14 +261,16 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             }
         }
     } else {
-        const imageHash = urlToHash(image);
-        const cachedImage = await env.MY_BUCKET.head(`images/${imageHash}`);
-        if (cachedImage) {
-            image = `${url}${imageHash}`;
-        } else {
-            const imageHash = await imageToR2(env, image);
-            if (imageHash) {
+        if (!image.includes(PUBLIC_R2_BASE_URL_DOMAIN)) {
+            const imageHash = urlToHash(image);
+            const cachedImage = await env.MY_BUCKET.head(`images/${imageHash}`);
+            if (cachedImage) {
                 image = `${url}${imageHash}`;
+            } else {
+                const imageHash = await imageToR2(env, image);
+                if (imageHash) {
+                    image = `${url}${imageHash}`;
+                }
             }
         }
     }
