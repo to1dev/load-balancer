@@ -260,7 +260,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         if (cachedImage) {
             image = `${url}${imageHash}`;
         } else {
-            const imageHash = imageToR2(env, image);
+            const imageHash = await imageToR2(env, image);
             if (imageHash) {
                 image = `${url}${imageHash}`;
             }
