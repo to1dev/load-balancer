@@ -183,6 +183,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
                     pid: null,
                     po: null,
                     image: null,
+                    banner: null,
                 },
                 profile: null,
             });
@@ -196,6 +197,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
                 pid: null,
                 po: null,
                 image: null,
+                banner: null,
             },
             profile: null,
         });
@@ -211,6 +213,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
                 pid: null,
                 po: null,
                 image: null,
+                banner: null,
             },
             profile: null,
         });
@@ -226,6 +229,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
                 pid: pid.pid,
                 po: null,
                 image: null,
+                banner: null,
             },
             profile: null,
         });
@@ -241,6 +245,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
                 pid: pid.pid,
                 po: profile?.owner,
                 image: null,
+                banner: null,
             },
             profile: profile?.profile,
         });
@@ -287,6 +292,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
                 image: image,
                 imageHash: imageHash,
                 imageData: imageData,
+                banner: null,
             },
             profile: profile?.profile,
         });
