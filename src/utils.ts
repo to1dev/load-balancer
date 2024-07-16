@@ -1,4 +1,4 @@
-import { PUBLIC_SEQUENCE_BASE_URL, allowedOrigins, apiServers } from './consts';
+import { PUBLIC_SEQUENCE_BASE_URL, PUBLIC_SEQUENCE_ROUTER2, allowedOrigins, apiServers } from './consts';
 import { IRequest } from 'itty-router';
 import { base64, hex } from '@scure/base';
 import * as btc from '@scure/btc-signer';
@@ -285,12 +285,21 @@ export function packResponse(data: any): Response {
     });
 }
 
-export async function sendQueue(realm: string): Promise<any> {
+export async function sendProfileQueue(id: string, data: any): Promise<any> {
     const baseUrl = PUBLIC_SEQUENCE_BASE_URL;
-    const url: string = `${baseUrl}${realm}`;
+    const router = PUBLIC_SEQUENCE_ROUTER2;
+    const url: string = `${baseUrl}${router}/${id}`;
+
+    const fetchOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    };
 
     try {
-        const res = await fetch(url);
+        const res = await fetch(url, fetchOptions);
         if (!res.ok) {
             throw new Error(`Error sending queue message: ${res.statusText}`);
         }

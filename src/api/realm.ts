@@ -16,6 +16,7 @@ import {
     fetchApiServer,
     scriptAddress,
     packResponse,
+    sendProfileQueue,
 } from '../utils';
 import { IRequest } from 'itty-router';
 
@@ -234,6 +235,8 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             profile: null,
         });
     }
+
+    await sendProfileQueue(pid.pid, profile?.profile);
 
     let image = profile?.profile?.image ? profile?.profile?.image : profile?.profile?.i;
     if (!image) {
