@@ -267,7 +267,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         }
     } else {
         if (!image.includes(PUBLIC_R2_BASE_URL_DOMAIN)) {
-            const imageHash = urlToHash(image);
+            imageHash = urlToHash(image);
             const cachedImage = await env.MY_BUCKET.head(`images/${imageHash}`);
             if (cachedImage) {
                 image = `${url}${imageHash}`;
@@ -313,7 +313,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         }
     } else {
         if (!banner.includes(PUBLIC_R2_BASE_URL_DOMAIN)) {
-            const bannerHash = urlToHash(banner);
+            bannerHash = urlToHash(banner);
             const cachedBanner = await env.MY_BUCKET.head(`images/${imageHash}`);
             if (cachedBanner) {
                 banner = `${url}${bannerHash}`;
