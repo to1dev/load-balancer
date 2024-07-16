@@ -12,6 +12,8 @@ import {
     hexToBytes,
 } from '../utils';
 import { IRequest } from 'itty-router';
+import { blake3 } from '@noble/hashes/blake3';
+import { bytesToHex, randomBytes } from '@noble/hashes/utils';
 
 async function fetchRealmAtomicalId(request: IRequest, realm: string): Promise<any | null> {
     const endpoint = PUBLIC_ELECTRUMX_ENDPOINT1;
@@ -226,6 +228,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     }
 
     let imageData: string | null = null;
+    let imageHash: string | null = null;
     let image = profile?.profile?.image ? profile?.profile?.image : profile?.profile?.i;
     const iid = parseAtomicalIdfromURN(image);
     if (iid?.id) {
@@ -239,6 +242,8 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
                 imageData = await hexToBase64(env, iid?.id, hexImage.data, hexImage.ext);
             }
         }
+    } else {
+        imageHash = bytesToHex(blake3(image));
     }
 
     return packResponse({
@@ -249,6 +254,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             pid: pid.pid,
             po: profile?.owner,
             image: image,
+            imageHash: imageHash,
             imageData: imageData,
         },
         profile: profile?.profile,
