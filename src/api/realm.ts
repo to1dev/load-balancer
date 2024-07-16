@@ -1,4 +1,4 @@
-import { PUBLIC_ELECTRUMX_ENDPOINT1, PUBLIC_ELECTRUMX_ENDPOINT2, PUBLIC_ELECTRUMX_ENDPOINT3 } from '../consts';
+import { PUBLIC_ELECTRUMX_ENDPOINT1, PUBLIC_ELECTRUMX_ENDPOINT2, PUBLIC_ELECTRUMX_ENDPOINT3, PUBLIC_R2_BASE_URL } from '../consts';
 import {
     findFirstDKeyValue,
     findObjectWithKey,
@@ -231,20 +231,12 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     if (iid?.id) {
         const cachedImage = await env.MY_BUCKET.head(`images/${iid?.id}`);
         if (cachedImage) {
-            image = `https://r2.arc20.me/images/${iid?.id}`;
+            const url = PUBLIC_R2_BASE_URL;
+            image = `${url}${iid?.id}`;
         } else {
-            const hexImage = await fetchHexData(request, iid.id);
+            const hexImage = await fetchHexData(request, iid?.id);
             if (hexImage) {
-                imageData = hexToBase64(hexImage.data, hexImage.ext);
-
-                const bytes = hexToBytes(hexImage.data, hexImage.ext);
-                if (bytes) {
-                    await env.MY_BUCKET.put(`images/${iid?.id}`, bytes.buffer, {
-                        httpMetadata: {
-                            contentType: `image/${hexImage.ext}`,
-                        },
-                    });
-                }
+                imageData = await hexToBase64(env, iid?.id, hexImage.data, hexImage.ext);
             }
         }
     }
