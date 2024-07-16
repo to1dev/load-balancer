@@ -235,7 +235,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     if (!image) {
         return packResponse({
             meta: {
-                v: null,
+                v: profile.profile?.v,
                 id: id.id,
                 cid: id.cid,
                 pid: pid.pid,
@@ -275,6 +275,51 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         }
     }
 
+    let banner = profile?.profile?.banner ? profile?.profile?.banner : profile?.profile?.b;
+    if (!banner) {
+        return packResponse({
+            meta: {
+                v: profile.profile?.v,
+                id: id.id,
+                cid: id.cid,
+                pid: pid.pid,
+                po: profile?.owner,
+                image: image,
+                imageHash: imageHash,
+                imageData: imageData,
+            },
+            profile: profile?.profile,
+        });
+    }
+
+    let bannerData: string | null = null;
+    let bannerHash: string | null = null;
+    const bid = parseAtomicalIdfromURN(banner);
+    if (bid?.id) {
+        const cachedBanner = await env.MY_BUCKET.head(`images/${bid?.id}`);
+        if (cachedBanner) {
+            banner = `${url}${bid?.id}`;
+        } else {
+            const hexBanner = await fetchHexData(request, bid?.id);
+            if (hexBanner) {
+                bannerData = await hexToBase64(env, bid?.id, hexBanner.data, hexBanner.ext);
+            }
+        }
+    } else {
+        if (!banner.includes(PUBLIC_R2_BASE_URL_DOMAIN)) {
+            const bannerHash = urlToHash(banner);
+            const cachedBanner = await env.MY_BUCKET.head(`images/${imageHash}`);
+            if (cachedBanner) {
+                banner = `${url}${bannerHash}`;
+            } else {
+                const bannerHash = await imageToR2(env, banner);
+                if (bannerHash) {
+                    banner = `${url}${bannerHash}`;
+                }
+            }
+        }
+    }
+
     return packResponse({
         meta: {
             v: profile.profile?.v,
@@ -285,6 +330,9 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             image: image,
             imageHash: imageHash,
             imageData: imageData,
+            banner: banner,
+            bannerHash: bannerHash,
+            bannerData: bannerData,
         },
         profile: profile?.profile,
     });
