@@ -370,19 +370,17 @@ export async function fetchHexData(request: IRequest, id: ParsedId | null | unde
                             try {
                                 const res = await fetchApiServer(request, path);
                                 if (!res.ok) {
-                                    //throw new Error(`Error fetching data: ${res.statusText}`);
-                                    console.error(`Error fetching data: ${res.statusText}`);
-                                    //return null;
+                                    throw new Error(`Error fetching data: ${res.statusText}`);
                                 }
-
-                                console.log(JSON.stringify(res));
 
                                 const data: any = await res.json();
                                 if (!data) {
                                     return null;
                                 }
 
-                                console.log(data?.success);
+                                if (!data?.success) {
+                                    throw new Error(`Need to try another way: ${res.statusText}`);
+                                }
 
                                 const imageData = extractHexData(data.response?.result?.mint_data);
 
