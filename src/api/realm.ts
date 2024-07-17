@@ -236,7 +236,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         });
     }
 
-    await sendProfileQueue(pid.pid, profile?.profile);
+    await sendProfileQueue(pid.pid, profile);
 
     let image = profile?.profile?.image ? profile?.profile?.image : profile?.profile?.i;
     if (!image) {
