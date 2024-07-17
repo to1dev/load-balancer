@@ -1,4 +1,12 @@
-import { PUBLIC_SEQUENCE_BASE_URL, PUBLIC_SEQUENCE_ROUTER2, allowedOrigins, apiServers } from './consts';
+import {
+    PUBLIC_SEQUENCE_BASE_URL,
+    PUBLIC_ELECTRUMX_ENDPOINT1,
+    PUBLIC_ELECTRUMX_ENDPOINT2,
+    PUBLIC_ELECTRUMX_ENDPOINT3,
+    PUBLIC_SEQUENCE_ROUTER2,
+    allowedOrigins,
+    apiServers,
+} from './consts';
 import { IRequest } from 'itty-router';
 import { base64, hex } from '@scure/base';
 import * as btc from '@scure/btc-signer';
@@ -206,13 +214,6 @@ export function extractImages(data: JsonData, result: string[] = []): string[] {
     return result;
 }
 
-const mainnet = {
-    bech32: 'bc',
-    pubKeyHash: 0x00,
-    scriptHash: 0x05,
-    wif: 0x80,
-};
-
 export async function fetchApiServer(request: IRequest, path: string): Promise<any> {
     /*const url = new URL(request.url);
     let path = url.pathname.replace(/^\/proxy/, '');
@@ -243,6 +244,183 @@ export async function fetchApiServer(request: IRequest, path: string): Promise<a
 
     return new Response('All API servers are unavailable', { status: 503 });
 }
+
+export async function fetchRealmAtomicalId(request: IRequest, realm: string): Promise<any | null> {
+    const endpoint = PUBLIC_ELECTRUMX_ENDPOINT1;
+    const path: string = `${endpoint}?params=["${realm}"]`;
+
+    try {
+        const res = await fetchApiServer(request, path);
+        if (!res.ok) {
+            throw new Error(`Error fetching data: ${res.statusText}`);
+        }
+
+        const data: any = await res.json();
+        if (!data) {
+            return null;
+        }
+
+        const id = data.response?.result?.atomical_id;
+        const cid = data.response?.result?.candidates[0]?.atomical_id;
+        if (!id) {
+            if (!cid) {
+                return null;
+            }
+            return {
+                id: null,
+                cid: cid,
+            };
+        }
+
+        return {
+            id,
+            cid,
+        };
+    } catch (error) {
+        console.error('Failed to fetch realm id:', error);
+        return null;
+    }
+}
+
+export async function fetchRealmProfileId(request: IRequest, id: string): Promise<any | null> {
+    const endpoint = PUBLIC_ELECTRUMX_ENDPOINT2;
+    const path: string = `${endpoint}?params=["${id}",10,0,"mod"]`;
+
+    try {
+        const res = await fetchApiServer(request, path);
+        if (!res.ok) {
+            throw new Error(`Error fetching data: ${res.statusText}`);
+        }
+
+        const data: any = await res.json();
+        if (!data) {
+            return null;
+        }
+
+        if (Array.isArray(data.response?.result) && data.response.result.length > 0) {
+            const pid = await findFirstDKeyValue(data.response.result);
+            if (pid) {
+                return { pid };
+            }
+        }
+
+        return null;
+    } catch (error) {
+        console.error('Failed to fetch realm profile id:', error);
+        return null;
+    }
+}
+
+export async function fetchRealmProfile(request: IRequest, id: string): Promise<any | null> {
+    const endpoint = PUBLIC_ELECTRUMX_ENDPOINT3;
+    const path: string = `${endpoint}?params=["${id}"]`;
+
+    try {
+        const res = await fetchApiServer(request, path);
+        if (!res.ok) {
+            throw new Error(`Error fetching data: ${res.statusText}`);
+        }
+
+        const data: any = await res.json();
+        if (!data) {
+            return null;
+        }
+
+        const profile = await findObjectWithKey(data.response?.result?.mint_data?.fields, 'v');
+
+        if (!profile) {
+            return null;
+        }
+
+        let address = scriptAddress(data.response?.result?.mint_info?.reveal_location_script);
+
+        if (!address) {
+            return {
+                profile: profile,
+                owner: null,
+            };
+        }
+
+        return {
+            profile: profile,
+            owner: address,
+        };
+    } catch (error) {
+        console.error('Failed to fetch realm profile:', error);
+        return null;
+    }
+}
+
+interface ImageData {
+    ext: string | null;
+    data: string | null;
+}
+
+export async function fetchHexData(request: IRequest, id: ParsedId | null | undefined): Promise<ImageData | null> {
+    switch (id?.protocol) {
+        case 'btc':
+            switch (id?.prefix) {
+                case 'atom':
+                    const endpoint = PUBLIC_ELECTRUMX_ENDPOINT3;
+                    const path: string = `${endpoint}?params=["${id?.id}"]`;
+
+                    try {
+                        const res = await fetchApiServer(request, path);
+                        if (!res.ok) {
+                            throw new Error(`Error fetching data: ${res.statusText}`);
+                        }
+
+                        const data: any = await res.json();
+                        if (!data) {
+                            return null;
+                        }
+
+                        const imageData = extractHexData(data.response?.result?.mint_data);
+
+                        if (imageData && imageData.length > 0) {
+                            const image = imageData[0];
+                            return {
+                                ext: image?.ext,
+                                data: image?.hexData,
+                            };
+                        }
+
+                        return null;
+                    } catch (error) {
+                        console.error('Failed to fetch hex data:', error);
+                        return null;
+                    }
+
+                case 'ord':
+                    break;
+
+                default:
+                    console.log('BTC protocol with unknown prefix');
+                    break;
+            }
+
+        case 'eth':
+            console.log('ethereum protocol');
+            break;
+
+        case 'solana':
+            console.log('Solana protocol');
+            break;
+
+        default:
+            console.log('Unknown protocol');
+            break;
+    }
+
+    return null;
+}
+
+const mainnet = {
+    bech32: 'bc',
+    pubKeyHash: 0x00,
+    scriptHash: 0x05,
+    wif: 0x80,
+};
 
 export function scriptAddress(hexScript: string): string | null {
     if (!hexScript) {
