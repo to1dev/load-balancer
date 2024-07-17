@@ -259,6 +259,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     let imageHash: string | null = null;
     const iid = parseAtomicalIdfromURN(image);
     if (iid?.id) {
+        // todo 这里需要根据 iid.type=dat/id 来进行不同操作
         const cachedImage = await env.MY_BUCKET.head(`images/${iid?.id}`);
         if (cachedImage) {
             image = `${url}${iid?.id}`;
