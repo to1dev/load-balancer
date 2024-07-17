@@ -361,34 +361,44 @@ export async function fetchHexData(request: IRequest, id: ParsedId | null | unde
         case 'btc':
             switch (id?.prefix) {
                 case 'atom':
-                    const endpoint = PUBLIC_ELECTRUMX_ENDPOINT3;
-                    const path: string = `${endpoint}?params=["${id?.id}"]`;
+                    switch (id?.type) {
+                        case 'id':
+                        case 'dat':
+                            const endpoint = PUBLIC_ELECTRUMX_ENDPOINT3;
+                            const path: string = `${endpoint}?params=["${id?.id}"]`;
 
-                    try {
-                        const res = await fetchApiServer(request, path);
-                        if (!res.ok) {
-                            throw new Error(`Error fetching data: ${res.statusText}`);
-                        }
+                            try {
+                                const res = await fetchApiServer(request, path);
+                                if (!res.ok) {
+                                    throw new Error(`Error fetching data: ${res.statusText}`);
+                                }
 
-                        const data: any = await res.json();
-                        if (!data) {
-                            return null;
-                        }
+                                const data: any = await res.json();
+                                if (!data) {
+                                    return null;
+                                }
 
-                        const imageData = extractHexData(data.response?.result?.mint_data);
+                                console.log(data?.success);
 
-                        if (imageData && imageData.length > 0) {
-                            const image = imageData[0];
-                            return {
-                                ext: image?.ext,
-                                data: image?.hexData,
-                            };
-                        }
+                                const imageData = extractHexData(data.response?.result?.mint_data);
 
-                        return null;
-                    } catch (error) {
-                        console.error('Failed to fetch hex data:', error);
-                        return null;
+                                if (imageData && imageData.length > 0) {
+                                    const image = imageData[0];
+                                    return {
+                                        ext: image?.ext,
+                                        data: image?.hexData,
+                                    };
+                                }
+
+                                return null;
+                            } catch (error) {
+                                console.error('Failed to fetch hex data:', error);
+                                return null;
+                            }
+
+                        default:
+                            console.log('atom prefix with unknown type');
+                            break;
                     }
 
                 case 'ord':
