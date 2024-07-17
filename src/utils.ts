@@ -370,7 +370,9 @@ export async function fetchHexData(request: IRequest, id: ParsedId | null | unde
                             try {
                                 const res = await fetchApiServer(request, path);
                                 if (!res.ok) {
-                                    throw new Error(`Error fetching data: ${res.statusText}`);
+                                    //throw new Error(`Error fetching data: ${res.statusText}`);
+                                    console.error(`Error fetching data: ${res.statusText}`);
+                                    //return null;
                                 }
 
                                 const data: any = await res.json();
