@@ -375,7 +375,7 @@ export async function fetchHexData(request: IRequest, id: ParsedId | null | unde
                                     //return null;
                                 }
 
-                                console.log(res);
+                                console.log(res?.success);
 
                                 const data: any = await res.json();
                                 if (!data) {
