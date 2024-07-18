@@ -216,7 +216,7 @@ export function extractImages(data: JsonData, result: string[] = []): string[] {
     return result;
 }
 
-export async function fetchApiServer(request: IRequest, path: string): Promise<any> {
+export async function fetchApiServer(request: IRequest, path: string, needFix: boolean = false): Promise<any> {
     /*const url = new URL(request.url);
     let path = url.pathname.replace(/^\/proxy/, '');
     if (url.search) {
@@ -228,7 +228,10 @@ export async function fetchApiServer(request: IRequest, path: string): Promise<a
     const path = url.pathname === '/' ? '' : url.pathname + url.search;*/
 
     for (let i = 0; i < apiServers.length; i++) {
-        const randomIndex = Math.floor(Math.random() * apiServers.length);
+        let randomIndex = 0;
+        if (!needFix) {
+            randomIndex = Math.floor(Math.random() * apiServers.length);
+        }
         const apiUrl = `${apiServers[randomIndex]}/${path}`;
         const newRequest = new Request(apiUrl, request);
 
@@ -442,7 +445,7 @@ export async function fetchHexData(request: IRequest, id: ParsedId | null | unde
                                 const endpoint = PUBLIC_ELECTRUMX_ENDPOINT4;
                                 const path: string = `${endpoint}?params=["${txid}"]`;
 
-                                const res = await fetchApiServer(request, path);
+                                const res = await fetchApiServer(request, path, true);
                                 if (!res.ok) {
                                     console.error(`Error fetching data: ${res.statusText}`);
                                     return null;
