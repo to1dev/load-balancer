@@ -6,6 +6,8 @@ import {
     PUBLIC_SEQUENCE_ROUTER2,
     allowedOrigins,
     apiServers,
+    PUBLIC_ELECTRUMX_ENDPOINT4,
+    PUBLIC_ELECTRUMX_ENDPOINT5,
 } from './consts';
 import { IRequest } from 'itty-router';
 import { base64, hex } from '@scure/base';
@@ -78,10 +80,10 @@ export async function findObjectWithKey(data: JsonData, targetKey: string): Prom
 type AtomId = string;
 
 export interface ParsedId {
-    prefix?: string | null;
-    protocol?: string | null;
-    type?: string | null;
-    id?: AtomId | null;
+    prefix: string | null;
+    protocol: string | null;
+    type: string | null;
+    id: AtomId | null;
 }
 
 const removeDuplicatePrefixes = (line: string): string => {
@@ -311,6 +313,33 @@ export async function fetchRealmProfileId(request: IRequest, id: string): Promis
     }
 }
 
+export async function fetchRealmProfileIdFastest(request: IRequest, id: string): Promise<any | null> {
+    const endpoint = PUBLIC_ELECTRUMX_ENDPOINT5;
+    const path: string = `${endpoint}?params=["${id}"]`;
+
+    try {
+        const res = await fetchApiServer(request, path);
+        if (!res.ok) {
+            throw new Error(`Error fetching data: ${res.statusText}`);
+        }
+
+        const data: any = await res.json();
+        if (!data) {
+            return null;
+        }
+
+        const pid = data.response?.result?.state?.latest?.d;
+        if (pid) {
+            return { pid };
+        }
+
+        return null;
+    } catch (error) {
+        console.error('Failed to fetch realm profile id:', error);
+        return null;
+    }
+}
+
 export async function fetchRealmProfile(request: IRequest, id: string): Promise<any | null> {
     const endpoint = PUBLIC_ELECTRUMX_ENDPOINT3;
     const path: string = `${endpoint}?params=["${id}"]`;
@@ -356,6 +385,18 @@ interface ImageData {
     data: string | null;
 }
 
+function getTxIdFromAtomicalId(atomicalId: string | null): string | null {
+    if (!atomicalId) return null;
+
+    if (atomicalId.length === 64) {
+        return atomicalId;
+    }
+    if (atomicalId.indexOf('i') !== 64) {
+        throw new Error('Invalid atomicalId');
+    }
+    return atomicalId.substring(0, 64);
+}
+
 export async function fetchHexData(request: IRequest, id: ParsedId | null | undefined): Promise<ImageData | null> {
     switch (id?.protocol) {
         case 'btc':
@@ -395,6 +436,18 @@ export async function fetchHexData(request: IRequest, id: ParsedId | null | unde
                                 return null;
                             } catch (error) {
                                 console.error('Failed to fetch hex data:', error);
+                                console.log('Try another way...');
+
+                                const txid = getTxIdFromAtomicalId(id?.id);
+                                const endpoint = PUBLIC_ELECTRUMX_ENDPOINT4;
+                                const path: string = `${endpoint}?params=["${txid}"]`;
+
+                                const res = await fetchApiServer(request, path);
+                                if (!res.ok) {
+                                    console.error(`Error fetching data: ${res.statusText}`);
+                                    return null;
+                                }
+
                                 return null;
                             }
 
