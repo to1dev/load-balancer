@@ -331,9 +331,14 @@ export async function fetchRealmProfileIdFastest(request: IRequest, id: string):
             return null;
         }
 
+        const number = data.response?.result?.atomical_number;
         const pid = data.response?.result?.state?.latest?.d;
-        if (pid) {
-            return { pid };
+        if (number) {
+            if (pid) {
+                return { pid, number };
+            }
+
+            return { number };
         }
 
         return null;

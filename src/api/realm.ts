@@ -60,6 +60,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             meta: {
                 v: null,
                 id: id.id,
+                number: pid?.number,
                 cid: id.cid,
                 pid: null,
                 po: null,
@@ -76,6 +77,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             meta: {
                 v: null,
                 id: id.id,
+                number: pid?.number,
                 cid: id.cid,
                 pid: pid.pid,
                 po: null,
@@ -94,6 +96,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             meta: {
                 v: profile.profile?.v,
                 id: id.id,
+                number: pid?.number,
                 cid: id.cid,
                 pid: pid.pid,
                 po: profile?.owner,
@@ -183,6 +186,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         meta: {
             v: profile.profile?.v,
             id: id.id,
+            number: pid?.number,
             cid: id.cid,
             pid: pid.pid,
             po: profile?.owner,
