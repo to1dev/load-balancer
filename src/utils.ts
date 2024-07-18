@@ -456,6 +456,20 @@ export async function fetchHexData(request: IRequest, id: ParsedId | null | unde
                                     return null;
                                 }
 
+                                const data: any = await res.json();
+                                if (!data) {
+                                    console.error(`Error getting json data: ${res.statusText}`);
+                                    return null;
+                                }
+
+                                if (!data?.success) {
+                                    console.error(`Error getting right json result: ${res.statusText}`);
+                                    return null;
+                                }
+
+                                const tx = btc.Transaction.fromRaw(hex.decode(data?.response));
+                                console.log(tx);
+
                                 return null;
                             }
 
