@@ -468,7 +468,7 @@ export async function fetchHexData(request: IRequest, id: ParsedId | null | unde
                                 }
 
                                 const tx = btc.Transaction.fromRaw(hex.decode(data?.response));
-                                console.log(tx);
+                                console.log(tx.inputsLength);
 
                                 return null;
                             }
