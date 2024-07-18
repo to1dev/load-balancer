@@ -5,7 +5,6 @@ import {
     urlToHash,
     imageToR2,
     fetchRealmAtomicalId,
-    fetchRealmProfileId,
     fetchRealmProfileIdFastest,
     fetchRealmProfile,
     fetchHexData,
@@ -55,7 +54,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         });
     }
 
-    const pid = await fetchRealmProfileId(request, id.id);
+    const pid = await fetchRealmProfileIdFastest(request, id.id);
     if (!pid?.pid) {
         return packResponse({
             meta: {
