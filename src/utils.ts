@@ -341,7 +341,7 @@ export async function fetchRealmProfileIdFastest(request: IRequest, id: string):
             return { pid };
         }
 
-        let address = scriptAddress(data.response?.result?.location_info?.reveal_location_script);
+        let address = scriptAddress(data.response?.result?.location_info?.script);
         if (!address) {
             return {
                 pid,
