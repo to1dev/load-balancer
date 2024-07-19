@@ -333,13 +333,23 @@ export async function fetchRealmProfileIdFastest(request: IRequest, id: string):
 
         const number = data.response?.result?.atomical_number;
         const pid = data.response?.result?.state?.latest?.d;
-        if (number) {
-            if (pid) {
-                return { pid, number };
+        if (!number) {
+            if (!pid) {
+                return null;
             }
 
-            return { number };
+            return { pid };
         }
+
+        let address = scriptAddress(data.response?.result?.mint_info?.reveal_location_script);
+        if (!address) {
+            return {
+                pid,
+                number,
+            };
+        }
+
+        return { pid, number, address };
 
         return null;
     } catch (error) {
