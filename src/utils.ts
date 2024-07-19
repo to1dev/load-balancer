@@ -477,21 +477,23 @@ export async function fetchHexData(request: IRequest, id: ParsedId | null | unde
                                     return null;
                                 }
 
-                                const tx = btc.RawTx.decode(hex.decode(data?.responded));
+                                const tx = btc.RawTx.decode(hex.decode(data?.response));
 
-                                for (const witnesses of tx.witnesses ?? [][0]) {
-                                    for (const witness of witnesses) {
-                                        const res = decompile(witness);
-                                        if (res) {
-                                            for (const line of res) {
-                                                if (line instanceof Uint8Array) {
-                                                    console.log('line is a Uint8Array:', line);
-                                                } else if (Object.values(btc.OP).includes(line)) {
-                                                    console.log('line is OP:', line);
-                                                } else if (typeof line === 'number') {
-                                                    console.log('line is number:', line);
-                                                } else {
-                                                    console.log('line is not a Uint8Array:', line);
+                                if (tx) {
+                                    for (const witnesses of tx.witnesses ?? [][0]) {
+                                        for (const witness of witnesses) {
+                                            const res = decompile(witness);
+                                            if (res) {
+                                                for (const line of res) {
+                                                    if (line instanceof Uint8Array) {
+                                                        console.log('line is a Uint8Array:', line);
+                                                    } else if (Object.values(btc.OP).includes(line)) {
+                                                        console.log('line is OP:', line);
+                                                    } else if (typeof line === 'number') {
+                                                        console.log('line is number:', line);
+                                                    } else {
+                                                        console.log('line is not a Uint8Array:', line);
+                                                    }
                                                 }
                                             }
                                         }
