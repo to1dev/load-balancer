@@ -341,15 +341,24 @@ export async function fetchRealmProfileIdFastest(request: IRequest, id: string):
             return { pid };
         }
 
-        let address = scriptAddress(data.response?.result?.location_info?.script);
-        if (!address) {
+        let mintAddress = scriptAddress(data.response?.result?.mint_info?.reveal_location_script);
+        let address = scriptAddress(data.response?.result?.location_info[0]?.script);
+        if (!mintAddress) {
+            if (!address) {
+                return {
+                    pid,
+                    number,
+                };
+            }
+
             return {
                 pid,
                 number,
+                mintAddress,
             };
         }
 
-        return { pid, number, address };
+        return { pid, number, mintAddress, address };
 
         return null;
     } catch (error) {
