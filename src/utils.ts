@@ -405,6 +405,16 @@ function getTxIdFromAtomicalId(atomicalId: string | null): string | null {
     return atomicalId.substring(0, 64);
 }
 
+function decompile(witness: Uint8Array): btc.ScriptType | null {
+    try {
+        return btc.Script.decode(witness);
+    } catch (e) {
+        return null;
+    }
+
+    return null;
+}
+
 export async function fetchHexData(request: IRequest, id: ParsedId | null | undefined): Promise<ImageData | null> {
     switch (id?.protocol) {
         case 'btc':
@@ -467,9 +477,26 @@ export async function fetchHexData(request: IRequest, id: ParsedId | null | unde
                                     return null;
                                 }
 
-                                const tx = btc.Transaction.fromRaw(hex.decode(data?.response));
-                                console.log(tx.outputsLength);
-                                console.log(JSON.stringify(tx.getInput(0)));
+                                const tx = btc.RawTx.decode(hex.decode(data?.responded));
+
+                                for (const witnesses of tx.witnesses ?? [][0]) {
+                                    for (const witness of witnesses) {
+                                        const res = decompile(witness);
+                                        if (res) {
+                                            for (const line of res) {
+                                                if (line instanceof Uint8Array) {
+                                                    console.log('line is a Uint8Array:', line);
+                                                } else if (Object.values(btc.OP).includes(line)) {
+                                                    console.log('line is OP:', line);
+                                                } else if (typeof line === 'number') {
+                                                    console.log('line is number:', line);
+                                                } else {
+                                                    console.log('line is not a Uint8Array:', line);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
 
                                 return null;
                             }
