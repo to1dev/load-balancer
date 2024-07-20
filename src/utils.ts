@@ -163,6 +163,7 @@ export async function hexToBase64(
     }
 
     if (data) {
+        console.log(data.length);
         await env.MY_BUCKET.put(`images/${id}`, data.buffer, {
             httpMetadata: {
                 contentType: `image/${ext}`,
@@ -615,7 +616,7 @@ export async function fetchHexData(request: IRequest, id: ParsedId | null | unde
                                 const tx = btc.RawTx.decode(hex.decode(data?.response));
 
                                 if (tx) {
-                                    for (const witnesses of tx.witnesses ?? [][0]) {
+                                    for (const witnesses of tx.witnesses ?? [[]]) {
                                         for (const witness of witnesses) {
                                             const res = decompile(witness);
                                             if (res) {
