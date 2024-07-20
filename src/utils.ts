@@ -12,6 +12,7 @@ import {
 import { IRequest } from 'itty-router';
 import { base64, hex } from '@scure/base';
 import * as btc from '@scure/btc-signer';
+import { CBOR } from 'micro-ordinals/lib/cbor';
 import { blake3 } from '@noble/hashes/blake3';
 import { bytesToHex, randomBytes } from '@noble/hashes/utils';
 
@@ -23,6 +24,11 @@ export function createHeaders(): Headers {
         'Accept-Language': 'en-US,en;q=0.9',
         Connection: 'keep-alive',
     });
+}
+
+function getFileExtension(fileName: string): string {
+    const parts = fileName.split('.');
+    return parts.length > 1 ? parts[parts.length - 1] : 'png';
 }
 
 interface JsonData {
@@ -189,12 +195,35 @@ export function extractHexData(obj: any, parentKey = ''): ParsedHexData[] {
             if (key === '$b') {
                 const hexData = typeof obj[key] === 'string' ? obj[key] : obj[key].$b;
                 if (typeof hexData === 'string') {
-                    const parts = parentKey.split('.');
-                    const ext = parts.length > 1 ? parts[parts.length - 1] : 'png';
+                    //const parts = parentKey.split('.');
+                    //const ext = parts.length > 1 ? parts[parts.length - 1] : 'png';
+                    const ext = getFileExtension(parentKey);
                     result.push({ fileName: parentKey, ext: ext, hexData });
                 }
             } else {
                 result = result.concat(extractHexData(obj[key], key));
+            }
+        }
+    }
+
+    return result;
+}
+
+export function extractHexDataEx(obj: any, parentKey = ''): ParsedHexData[] {
+    let result: ParsedHexData[] = [];
+
+    if (obj && typeof obj === 'object') {
+        for (const key of Object.keys(obj)) {
+            const value = obj[key];
+
+            if (key === '$b' && typeof value === 'string') {
+                //const parts = parentKey.split('.');
+                //const ext = parts.length > 1 ? parts[parts.length - 1] : 'png';
+                const ext = getFileExtension(parentKey);
+                result.push({ fileName: parentKey, ext: ext, hexData: value });
+            } else if (typeof value === 'object') {
+                const newKey = parentKey ? `${parentKey}.${key}` : key;
+                result = result.concat(extractHexData(value, newKey));
             }
         }
     }
@@ -409,7 +438,8 @@ export async function fetchRealmProfile(request: IRequest, id: string): Promise<
 
 interface ImageData {
     ext: string | null;
-    data: string | null;
+    data?: string | null;
+    bytes?: Uint8Array | null;
 }
 
 function getTxIdFromAtomicalId(atomicalId: string | null): string | null {
@@ -432,6 +462,80 @@ function decompile(witness: Uint8Array): btc.ScriptType | null {
     }
 
     return null;
+}
+
+function concatenateUint8Arrays(data: any[]): Uint8Array {
+    let result: Uint8Array[] = [];
+    let collecting = false;
+    const keywords = ['atom', 'dat', 'mod', 'nft', 'ft', 'evt'];
+    const textDecoder = new TextDecoder();
+
+    for (const item of data) {
+        if (item === 'IF') {
+            collecting = true;
+        } else if (item === 'ENDIF') {
+            collecting = false;
+        } else if (collecting && item instanceof Uint8Array) {
+            const partialString = textDecoder.decode(item.subarray(0, 4));
+            if (!keywords.some((keyword) => partialString.includes(keyword))) {
+                result.push(item);
+            }
+        }
+    }
+
+    const totalLength = result.reduce((acc, arr) => acc + arr.length, 0);
+
+    const concatenatedArray = new Uint8Array(totalLength);
+
+    let offset = 0;
+    for (const arr of result) {
+        concatenatedArray.set(arr, offset);
+        offset += arr.length;
+    }
+
+    return concatenatedArray;
+}
+
+interface Result {
+    fileName: string;
+    data: Uint8Array;
+    contentType?: string;
+}
+
+function findUint8ArrayData(obj: any, parentKey: string = '', result: Result | null = null): Result | null {
+    if (!obj || typeof obj !== 'object') {
+        return result;
+    }
+
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            const value = obj[key];
+
+            if (value instanceof Uint8Array) {
+                return {
+                    fileName: parentKey || key,
+                    data: value,
+                    contentType: result ? result.contentType : undefined,
+                };
+            } else if (typeof value === 'object') {
+                const newResult = result || {
+                    fileName: parentKey || key,
+                    data: new Uint8Array(),
+                };
+
+                if (key === '$ct' && typeof value === 'string') {
+                    newResult.contentType = value;
+                }
+
+                const found = findUint8ArrayData(value, key, newResult);
+                if (found && found.data.length > 0) {
+                    return found;
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
 export async function fetchHexData(request: IRequest, id: ParsedId | null | undefined): Promise<ImageData | null> {
@@ -503,15 +607,16 @@ export async function fetchHexData(request: IRequest, id: ParsedId | null | unde
                                         for (const witness of witnesses) {
                                             const res = decompile(witness);
                                             if (res) {
-                                                for (const line of res) {
-                                                    if (line instanceof Uint8Array) {
-                                                        console.log('line is a Uint8Array:', line);
-                                                    } else if (Object.values(btc.OP).includes(line)) {
-                                                        console.log('line is OP:', line);
-                                                    } else if (typeof line === 'number') {
-                                                        console.log('line is number:', line);
-                                                    } else {
-                                                        console.log('line is not a Uint8Array:', line);
+                                                const bytes = concatenateUint8Arrays(res);
+                                                const decoded = CBOR.decode(bytes);
+                                                if (decoded) {
+                                                    const result = findUint8ArrayData(decoded);
+                                                    if (result) {
+                                                        const ext = getFileExtension(result.fileName);
+                                                        return {
+                                                            ext: ext,
+                                                            bytes: result.data,
+                                                        };
                                                     }
                                                 }
                                             }
