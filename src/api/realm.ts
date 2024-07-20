@@ -124,10 +124,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         } else {
             const hexImage = await fetchHexData(request, iid);
             if (hexImage) {
-                if (hexImage.data) {
-                    imageData = await hexToBase64(env, iid?.id, hexImage.data, hexImage.ext);
-                } else if (hexImage.bytes) {
-                }
+                imageData = await hexToBase64(env, iid?.id, hexImage?.data, hexImage?.bytes, hexImage.ext);
             }
         }
     } else {
@@ -176,10 +173,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         } else {
             const hexBanner = await fetchHexData(request, bid);
             if (hexBanner) {
-                if (hexBanner.data) {
-                    bannerData = await hexToBase64(env, bid?.id, hexBanner.data, hexBanner.ext);
-                } else if (hexBanner.bytes) {
-                }
+                bannerData = await hexToBase64(env, bid?.id, hexBanner?.data, hexBanner?.bytes, hexBanner.ext);
             }
         }
     } else {
