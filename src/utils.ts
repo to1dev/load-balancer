@@ -150,11 +150,12 @@ export async function hexToBase64(
         const bytes = hex.decode(hexString);
 
         if (bytes) {
-            await env.MY_BUCKET.put(`images/${id}`, bytes.buffer, {
+            /*await env.MY_BUCKET.put(`images/${id}`, bytes, {
                 httpMetadata: {
                     contentType: `image/${ext}`,
                 },
-            });
+            });*/
+            await env.MY_BUCKET.put(`images/${id}`, bytes);
         }
 
         const b64 = base64.encode(bytes);
