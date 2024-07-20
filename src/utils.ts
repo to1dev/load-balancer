@@ -181,7 +181,6 @@ export async function imageToR2(env: Env, image: string): Promise<string | null>
     let imageHash: string | null = null;
     const imageResponse = await fetch(image);
     if (imageResponse.ok) {
-        //const imageBytes = await imageResponse.arrayBuffer();
         const imageBytes = await imageResponse.arrayBuffer();
         if (imageBytes) {
             imageHash = urlToHash(image);
