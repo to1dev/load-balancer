@@ -142,25 +142,37 @@ export const parseAtomicalIdfromURN = (line: string): ParsedId | null => {
 export async function hexToBase64(
     env: Env,
     id: string | null,
-    hexString: string | null,
+    hexString?: string | null,
+    data?: Uint8Array | null,
     ext: string | null = 'png'
 ): Promise<string | null> {
-    if (!hexString) {
-        return null;
-    }
-    const bytes = hex.decode(hexString);
+    if (hexString) {
+        const bytes = hex.decode(hexString);
 
-    if (bytes) {
-        await env.MY_BUCKET.put(`images/${id}`, bytes.buffer, {
+        if (bytes) {
+            await env.MY_BUCKET.put(`images/${id}`, bytes.buffer, {
+                httpMetadata: {
+                    contentType: `image/${ext}`,
+                },
+            });
+        }
+
+        const b64 = base64.encode(bytes);
+
+        return `data:image/${ext};base64,${b64}`;
+    }
+
+    if (data) {
+        await env.MY_BUCKET.put(`images/${id}`, data.buffer, {
             httpMetadata: {
                 contentType: `image/${ext}`,
             },
         });
+        const b64 = base64.encode(data);
+        return `data:image/${ext};base64,${b64}`;
     }
 
-    const b64 = base64.encode(bytes);
-
-    return `data:image/${ext};base64,${b64}`;
+    return null;
 }
 
 export function urlToHash(url: string): string {
