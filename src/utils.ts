@@ -164,7 +164,6 @@ export async function hexToBase64(
     }
 
     if (data) {
-        console.log(data.length);
         await env.MY_BUCKET.put(`images/${id}`, data);
         const b64 = base64.encode(data);
         return `data:image/${ext};base64,${b64}`;
