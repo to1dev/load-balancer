@@ -734,22 +734,37 @@ export async function sendProfileQueue(id: string, data: any): Promise<any> {
     return null;
 }
 
-export async function saveToD1(env: Env, realm: string, meta: any, profile: any): Promise<boolean> {
-    const { success } = await env.MY_DB.prepare(
-        `insert into realms (RealmName, RealmId, RealmNumber, RealmMinter, RealmOwner, RealmAvatar, RealmBanner, RealmMeta, RealmProfile) values (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)`
-    )
-        .bind(
-            realm,
-            meta?.id,
-            meta?.number,
-            meta?.mint,
-            meta?.owner,
-            meta?.image,
-            meta?.banner,
-            JSON.stringify(meta),
-            JSON.stringify(profile)
-        )
-        .run();
+async function realmExists(env: Env, realm: string): Promise<boolean> {
+    const sql = `SELECT 1 FROM data WHERE name = ?`;
+    const row = await env.MY_DB.prepare(sql).bind(realm).run();
+    return row !== undefined;
+}
 
-    return success;
+export async function saveToD1(env: Env, realm: string, meta: any, profile: any): Promise<boolean> {
+    const exists = await realmExists(env, realm);
+    if (!exists) {
+        const { success } = await env.MY_DB.prepare(
+            `insert into realms (RealmName, RealmId, RealmNumber, RealmMinter, RealmOwner, RealmAvatar, RealmBanner, RealmMeta, RealmProfile) values (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)`
+        )
+            .bind(
+                realm,
+                meta?.id,
+                meta?.number,
+                meta?.mint,
+                meta?.owner,
+                meta?.image,
+                meta?.banner,
+                JSON.stringify(meta),
+                JSON.stringify(profile)
+            )
+            .run();
+
+        return success;
+    }
+
+    return false;
+}
+
+export async function readFromD1(env: Env, realm: string): Promise<{ meta: any; profile: any } | null> {
+    return null;
 }
