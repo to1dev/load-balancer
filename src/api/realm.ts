@@ -124,6 +124,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         } else {
             const hexImage = await fetchHexData(request, iid);
             if (hexImage) {
+                image = `${url}${iid?.id}`;
                 imageData = await hexToBase64(env, iid?.id, hexImage?.data, hexImage?.bytes, hexImage.ext);
             }
         }
