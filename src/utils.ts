@@ -737,7 +737,11 @@ export async function sendProfileQueue(id: string, data: any): Promise<any> {
 async function realmExists(env: Env, realm: string): Promise<boolean> {
     const sql = `SELECT RealmName FROM realms WHERE RealmName = ?1 LIMIT 1`;
     const _realm = await env.MY_DB.prepare(sql).bind(realm).first();
-    return _realm !== null;
+    if (_realm) {
+        return true;
+    }
+
+    return false;
 }
 
 export async function saveToD1(env: Env, realm: string, meta: any, profile: any): Promise<boolean> {
