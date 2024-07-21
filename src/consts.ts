@@ -9,6 +9,7 @@ export const PUBLIC_SEQUENCE_ROUTER1 = 'realm';
 export const PUBLIC_SEQUENCE_ROUTER2 = 'profile';
 export const PUBLIC_R2_BASE_URL = 'https://s1.arc20.me/images/';
 export const PUBLIC_R2_BASE_URL_DOMAIN = 's1.arc20.me';
+export const PUBLIC_ORD_BASE_URL = 'https://ordinals.com/content/';
 
 export const allowedOrigins = ['https://arc20.me', 'http://localhost:5173'];
 export const apiServers = ['https://ep.wizz.cash/proxy', 'https://ep.atomicalmarket.com/proxy'];

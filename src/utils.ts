@@ -8,6 +8,7 @@ import {
     apiServers,
     PUBLIC_ELECTRUMX_ENDPOINT4,
     PUBLIC_ELECTRUMX_ENDPOINT5,
+    PUBLIC_ORD_BASE_URL,
 } from './consts';
 import { IRequest } from 'itty-router';
 import { base64, hex } from '@scure/base';
@@ -623,7 +624,20 @@ export async function fetchHexData(request: IRequest, id: ParsedId | null | unde
                     }
 
                 case 'ord':
-                    break;
+                    if (id.id) {
+                        const baseOrdUrl = PUBLIC_ORD_BASE_URL;
+                        const imageUrl = `${baseOrdUrl}${id.id}`;
+                        const imageResponse = await fetch(imageUrl);
+                        if (imageResponse.ok) {
+                            const imageBytes = await imageResponse.arrayBuffer();
+                            if (imageBytes) {
+                                return {
+                                    ext: null,
+                                    bytes: new Uint8Array(imageBytes),
+                                };
+                            }
+                        }
+                    }
 
                 default:
                     console.log('BTC protocol with unknown prefix');
