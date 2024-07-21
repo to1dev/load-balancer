@@ -145,22 +145,28 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
     let banner = profile?.profile?.banner ? profile?.profile?.banner : profile?.profile?.b;
     if (!banner) {
+        const _meta = {
+            v: profile.profile?.v,
+            id: id.id,
+            number: pid?.number,
+            cid: id.cid,
+            mint: pid?.mintAddress,
+            owner: pid?.address,
+            pid: pid.pid,
+            po: profile?.owner,
+            image: image,
+            imageHash: imageHash,
+            imageData: imageData,
+            banner: null,
+        };
+
+        const _profile = profile?.profile;
+
+        const success = await saveToD1(env, realm, _meta, _profile);
+
         return packResponse({
-            meta: {
-                v: profile.profile?.v,
-                id: id.id,
-                number: pid?.number,
-                cid: id.cid,
-                mint: pid?.mintAddress,
-                owner: pid?.address,
-                pid: pid.pid,
-                po: profile?.owner,
-                image: image,
-                imageHash: imageHash,
-                imageData: imageData,
-                banner: null,
-            },
-            profile: profile?.profile,
+            meta: _meta,
+            profile: _profile,
         });
     }
 
