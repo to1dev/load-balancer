@@ -738,7 +738,17 @@ export async function saveToD1(env: Env, realm: string, meta: any, profile: any)
     const { success } = await env.MY_DB.prepare(
         `insert into realms (RealmName, RealmId, RealmNumber, RealmMinter, RealmOwner, RealmAvatar, RealmBanner, RealmMeta, RealmProfile) values (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)`
     )
-        .bind(realm, meta?.id, meta?.number, meta?.mint, meta?.owner, meta?.image, meta?.banner, meta, profile)
+        .bind(
+            realm,
+            meta?.id,
+            meta?.number,
+            meta?.mint,
+            meta?.owner,
+            meta?.image,
+            meta?.banner,
+            JSON.stringify(meta),
+            JSON.stringify(profile)
+        )
         .run();
 
     return success;
