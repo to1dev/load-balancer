@@ -733,3 +733,13 @@ export async function sendProfileQueue(id: string, data: any): Promise<any> {
 
     return null;
 }
+
+export async function saveToD1(env: Env, realm: string, meta: any, profile: any): Promise<boolean> {
+    const { success } = await env.MY_DB.prepare(
+        `insert into realms (RealmName, RealmId, RealmNumber, RealmMinter, RealmOwner, RealmAvatar, RealmBanner, RealmMeta, RealmProfile) values (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)`
+    )
+        .bind(realm, meta?.id, meta?.number, meta?.mint, meta?.owner, meta?.image, meta?.banner, meta, profile)
+        .run();
+
+    return success;
+}

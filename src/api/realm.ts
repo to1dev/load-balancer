@@ -10,6 +10,7 @@ import {
     fetchHexData,
     packResponse,
     sendProfileQueue,
+    saveToD1,
 } from '../utils';
 import { IRequest } from 'itty-router';
 
@@ -191,23 +192,29 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         }
     }
 
+    const _meta = {
+        v: profile.profile?.v,
+        id: id.id,
+        number: pid?.number,
+        cid: id.cid,
+        mint: pid?.mintAddress,
+        owner: pid?.address,
+        pid: pid.pid,
+        po: profile?.owner,
+        image: image,
+        imageHash: imageHash,
+        imageData: imageData,
+        banner: banner,
+        bannerHash: bannerHash,
+        bannerData: bannerData,
+    };
+
+    const _profile = profile?.profile;
+
+    const success = await saveToD1(env, realm, _meta, _profile);
+
     return packResponse({
-        meta: {
-            v: profile.profile?.v,
-            id: id.id,
-            number: pid?.number,
-            cid: id.cid,
-            mint: pid?.mintAddress,
-            owner: pid?.address,
-            pid: pid.pid,
-            po: profile?.owner,
-            image: image,
-            imageHash: imageHash,
-            imageData: imageData,
-            banner: banner,
-            bannerHash: bannerHash,
-            bannerData: bannerData,
-        },
-        profile: profile?.profile,
+        meta: _meta,
+        profile: _profile,
     });
 }
