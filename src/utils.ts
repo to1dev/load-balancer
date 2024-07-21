@@ -35,7 +35,7 @@ interface JsonData {
     [key: string]: any;
 }
 
-export async function findFirstDKeyValue(dataArray: JsonData[]): Promise<string | null> {
+/*export async function findFirstDKeyValue(dataArray: JsonData[]): Promise<string | null> {
     for (const data of dataArray) {
         const result = await findDKeyValueInObject(data);
         if (result) {
@@ -60,7 +60,7 @@ async function findDKeyValueInObject(data: JsonData): Promise<string | null> {
         }
     }
     return null;
-}
+}*/
 
 export async function findObjectWithKey(data: JsonData, targetKey: string): Promise<JsonData | null> {
     if (typeof data !== 'object' || data === null) {
@@ -117,7 +117,7 @@ export const parseAtomicalIdfromURN = (line: string): ParsedId | null => {
         const type = parts[2];
         const idPart = parts.slice(3).join(':');
 
-        const id = idPart.split('/')[0]; // Remove any file extensions or paths
+        const id = idPart.split('/')[0];
 
         return {
             prefix: prefix,
@@ -125,15 +125,6 @@ export const parseAtomicalIdfromURN = (line: string): ParsedId | null => {
             type: type,
             id: id,
         };
-
-        /*if (
-            protocol === "btc" &&
-            (type === "id" || type === "dat") &&
-            prefix === "atom"
-        ) {
-        } else if (protocol === "btc" && type === "id" && prefix === "ord") {
-        } else {
-        }*/
     }
 
     return null;
@@ -255,16 +246,6 @@ export function extractImages(data: JsonData, result: string[] = []): string[] {
 }
 
 export async function fetchApiServer(request: IRequest, path: string, index: number = -1): Promise<any> {
-    /*const url = new URL(request.url);
-    let path = url.pathname.replace(/^\/proxy/, '');
-    if (url.search) {
-        path += url.search;
-    }*/
-
-    /*const url = new URL(request.url);
-    const pathname = url.pathname + url.search;
-    const path = url.pathname === '/' ? '' : url.pathname + url.search;*/
-
     for (let i = 0; i < apiServers.length; i++) {
         let randomIndex = Math.floor(Math.random() * apiServers.length);
         if (index > -1) {
@@ -325,7 +306,7 @@ export async function fetchRealmAtomicalId(request: IRequest, realm: string): Pr
     }
 }
 
-export async function fetchRealmProfileId(request: IRequest, id: string): Promise<any | null> {
+/*export async function fetchRealmProfileId(request: IRequest, id: string): Promise<any | null> {
     const endpoint = PUBLIC_ELECTRUMX_ENDPOINT2;
     const path: string = `${endpoint}?params=["${id}",10,0,"mod"]`;
 
@@ -352,7 +333,7 @@ export async function fetchRealmProfileId(request: IRequest, id: string): Promis
         console.error('Failed to fetch realm profile id:', error);
         return null;
     }
-}
+}*/
 
 export async function fetchRealmProfileIdFastest(request: IRequest, id: string): Promise<any | null> {
     const endpoint = PUBLIC_ELECTRUMX_ENDPOINT5;
