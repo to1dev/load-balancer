@@ -119,9 +119,8 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     const iid = parseAtomicalIdfromURN(image);
     if (iid?.id) {
         const cachedImage = await env.MY_BUCKET.head(`images/${iid?.id}`);
-        if (cachedImage) {
-            image = `${url}${iid?.id}`;
-        } else {
+        image = `${url}${iid?.id}`;
+        if (!cachedImage) {
             const hexImage = await fetchHexData(request, iid);
             if (hexImage) {
                 image = `${url}${iid?.id}`;
