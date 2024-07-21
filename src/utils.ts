@@ -735,7 +735,7 @@ export async function sendProfileQueue(id: string, data: any): Promise<any> {
 }
 
 async function realmExists(env: Env, realm: string): Promise<boolean> {
-    const sql = `SELECT 1 FROM data WHERE name = ?`;
+    const sql = `SELECT 1 FROM realms WHERE RealmName = ?`;
     const row = await env.MY_DB.prepare(sql).bind(realm).run();
     return row !== undefined;
 }
