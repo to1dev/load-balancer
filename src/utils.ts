@@ -780,8 +780,8 @@ export async function readFromD1(env: Env, realm: string): Promise<any | null> {
                 avatar: values?.RealmAvatar,
                 banner: values?.RealmBanner,
             },
-            meta: values?.RealmMeta,
-            profile: values?.RealmProfile,
+            meta: JSON.parse(values?.RealmMeta as string),
+            profile: JSON.parse(values?.RealmProfile as string),
         };
     }
 
