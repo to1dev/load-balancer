@@ -22,6 +22,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
     const values = await readFromD1(env, realm);
     if (values) {
+        console.log(values);
         return packResponse(values);
     }
 
