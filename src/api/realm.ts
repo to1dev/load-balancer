@@ -14,21 +14,34 @@ import {
     readFromD1,
 } from '../utils';
 import { IRequest } from 'itty-router';
+import { getAllowedOrigin } from '../utils';
 
 export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionContext): Promise<Response> {
     const realm = request.params.realm;
     const query = request.query;
 
-    console.log(query?.action);
+    // KV
+    const cacheKey = `cache:${realm}`;
+    const origin = request.headers.get('Origin');
+    const allowedOrigin = getAllowedOrigin(origin);
+    const cachedData = await env.api.get(cacheKey, { type: 'json' });
+    if (cachedData) {
+        return new Response(JSON.stringify(cachedData), {
+            headers: {
+                'Access-Control-Allow-Origin': allowedOrigin,
+                'Content-Type': 'application/json',
+                'Cache-Control': 'public, max-age=600',
+            },
+        });
+    }
 
     // D1
 
     const values = await readFromD1(env, realm);
     if (values) {
+        ctx.waitUntil(env.api.put(cacheKey, JSON.stringify(values), { expirationTtl: 600 }));
         return packResponse(values);
     }
-
-    // KV
 
     // API
     const id = await fetchRealmAtomicalId(request, realm);
