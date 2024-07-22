@@ -708,7 +708,7 @@ export function packResponse(data: any): Response {
     });
 }
 
-export async function sendProfileQueue(env: Env, id: string, data: any): Promise<any> {
+export async function sendProfileQueue(id: string, data: any): Promise<any> {
     const baseUrl = PUBLIC_SEQUENCE_BASE_URL;
     const router = PUBLIC_SEQUENCE_ROUTER2;
     const url: string = `${baseUrl}${router}/${id}`;
@@ -732,6 +732,10 @@ export async function sendProfileQueue(env: Env, id: string, data: any): Promise
     }
 
     return null;
+}
+
+export async function sendProfileQueueEx(env: Env, id: string, data: any): Promise<void> {
+    await env.MY_SERVICE.sendQueue(id, data);
 }
 
 async function realmExists(env: Env, realm: string): Promise<boolean> {

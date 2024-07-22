@@ -18,9 +18,6 @@ import { IRequest } from 'itty-router';
 export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionContext): Promise<Response> {
     const realm = request.params.realm;
 
-    const result = await env.MY_SERVICE.add(1, 2);
-    console.log(result);
-
     // D1
 
     const values = await readFromD1(env, realm);
