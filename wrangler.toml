@@ -112,6 +112,7 @@ bucket_name = "arc20me"
 [[services]]
 binding = "MY_SERVICE"
 service = "persistent-sequence"
+entrypoint = "QueueWorker"
 
 # Bind a Vectorize index. Use to store and query vector embeddings for semantic search, classification and other vector search use-cases.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#vectorize-indexes
