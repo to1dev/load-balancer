@@ -11,6 +11,7 @@ import {
     packResponse,
     sendProfileQueue,
     saveToD1,
+    readFromD1,
 } from '../utils';
 import { IRequest } from 'itty-router';
 
@@ -18,6 +19,9 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     const realm = request.params.realm;
 
     // D1
+
+    await readFromD1(env, realm);
+
     // KV
 
     // Queue

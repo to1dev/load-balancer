@@ -766,5 +766,9 @@ export async function saveToD1(env: Env, realm: string, meta: any, profile: any)
 }
 
 export async function readFromD1(env: Env, realm: string): Promise<{ meta: any; profile: any } | null> {
+    const sql = `SELECT * FROM realms WHERE RealmName = ?1 LIMIT 1`;
+    const values = await env.MY_DB.prepare(sql).bind(realm).first();
+
+    console.log(values);
     return null;
 }
