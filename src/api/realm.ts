@@ -17,6 +17,9 @@ import { IRequest } from 'itty-router';
 
 export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionContext): Promise<Response> {
     const realm = request.params.realm;
+    const search = request.params.search;
+
+    console.log(search);
 
     // D1
 
@@ -26,9 +29,6 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     }
 
     // KV
-
-    // Queue
-    //await sendQueue(realm);
 
     // API
     const id = await fetchRealmAtomicalId(request, realm);
