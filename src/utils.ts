@@ -765,10 +765,25 @@ export async function saveToD1(env: Env, realm: string, meta: any, profile: any)
     return false;
 }
 
-export async function readFromD1(env: Env, realm: string): Promise<{ meta: any; profile: any } | null> {
+export async function readFromD1(env: Env, realm: string): Promise<any | null> {
     const sql = `SELECT * FROM realms WHERE RealmName = ?1 LIMIT 1`;
     const values = await env.MY_DB.prepare(sql).bind(realm).first();
 
-    console.log(values);
+    if (values) {
+        return {
+            realm: {
+                name: values?.RealmName,
+                id: values?.RealmId,
+                number: values?.RealmNumber,
+                minter: values?.RealmMinter,
+                owner: values?.RealmOwner,
+                avatar: values?.RealmAvatar,
+                banner: values?.RealmBanner,
+            },
+            meta: values?.RealmMeta,
+            profile: values?.RealmProfile,
+        };
+    }
+
     return null;
 }

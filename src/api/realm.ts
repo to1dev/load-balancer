@@ -20,7 +20,10 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
     // D1
 
-    await readFromD1(env, realm);
+    const values = await readFromD1(env, realm);
+    if (values) {
+        return packResponse(values);
+    }
 
     // KV
 
