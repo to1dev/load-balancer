@@ -708,7 +708,7 @@ export function packResponse(data: any): Response {
     });
 }
 
-export async function sendProfileQueue(id: string, data: any): Promise<any> {
+export async function sendProfileQueue(env: Env, id: string, data: any): Promise<any> {
     const baseUrl = PUBLIC_SEQUENCE_BASE_URL;
     const router = PUBLIC_SEQUENCE_ROUTER2;
     const url: string = `${baseUrl}${router}/${id}`;
