@@ -57,38 +57,46 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
     const pid = await fetchRealmProfileIdFastest(request, id.id);
     if (!pid?.pid) {
+        const _meta = {
+            v: null,
+            id: id.id,
+            number: pid?.number,
+            cid: id.cid,
+            mint: pid?.mintAddress,
+            owner: pid?.address,
+            pid: null,
+            po: null,
+            image: null,
+            banner: null,
+        };
+
+        const success = await saveToD1(env, realm, _meta, null);
+
         return packResponse({
-            meta: {
-                v: null,
-                id: id.id,
-                number: pid?.number,
-                cid: id.cid,
-                mint: pid?.mintAddress,
-                owner: pid?.address,
-                pid: null,
-                po: null,
-                image: null,
-                banner: null,
-            },
+            meta: _meta,
             profile: null,
         });
     }
 
     const profile = await fetchRealmProfile(request, pid.pid);
     if (!profile?.profile) {
+        const _meta = {
+            v: null,
+            id: id.id,
+            number: pid?.number,
+            cid: id.cid,
+            mint: pid?.mintAddress,
+            owner: pid?.address,
+            pid: pid.pid,
+            po: null,
+            image: null,
+            banner: null,
+        };
+
+        const success = await saveToD1(env, realm, _meta, null);
+
         return packResponse({
-            meta: {
-                v: null,
-                id: id.id,
-                number: pid?.number,
-                cid: id.cid,
-                mint: pid?.mintAddress,
-                owner: pid?.address,
-                pid: pid.pid,
-                po: null,
-                image: null,
-                banner: null,
-            },
+            meta: _meta,
             profile: null,
         });
     }
@@ -97,20 +105,26 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
     let image = profile?.profile?.image ? profile?.profile?.image : profile?.profile?.i;
     if (!image) {
+        const _meta = {
+            v: profile.profile?.v,
+            id: id.id,
+            number: pid?.number,
+            cid: id.cid,
+            mint: pid?.mintAddress,
+            owner: pid?.address,
+            pid: pid.pid,
+            po: profile?.owner,
+            image: null,
+            banner: null,
+        };
+
+        const _profile = profile?.profile;
+
+        const success = await saveToD1(env, realm, _meta, _profile);
+
         return packResponse({
-            meta: {
-                v: profile.profile?.v,
-                id: id.id,
-                number: pid?.number,
-                cid: id.cid,
-                mint: pid?.mintAddress,
-                owner: pid?.address,
-                pid: pid.pid,
-                po: profile?.owner,
-                image: null,
-                banner: null,
-            },
-            profile: profile?.profile,
+            meta: _meta,
+            profile: _profile,
         });
     }
 
