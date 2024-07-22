@@ -17,9 +17,9 @@ import { IRequest } from 'itty-router';
 
 export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionContext): Promise<Response> {
     const realm = request.params.realm;
-    const search = request.query;
+    const query = request.query;
 
-    console.log(search);
+    console.log(query?.action);
 
     // D1
 
