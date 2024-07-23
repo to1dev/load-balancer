@@ -30,7 +30,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             headers: {
                 'Access-Control-Allow-Origin': allowedOrigin,
                 'Content-Type': 'application/json',
-                'Cache-Control': 'public, max-age=600',
+                'Cache-Control': 'public, max-age=31536000',
             },
         });
     }
@@ -39,7 +39,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
     const values = await readFromD1(env, realm);
     if (values) {
-        ctx.waitUntil(env.api.put(cacheKey, JSON.stringify(values), { expirationTtl: 600 }));
+        ctx.waitUntil(env.api.put(cacheKey, JSON.stringify(values)));
         return packResponse(values);
     }
 
