@@ -20,27 +20,29 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     const realm = request.params.realm;
     const query = request.query;
 
-    // KV
-    const cacheKey = `cache:${realm}`;
-    const origin = request.headers.get('Origin');
-    const allowedOrigin = getAllowedOrigin(origin);
-    const cachedData = await env.api.get(cacheKey, { type: 'json' });
-    if (cachedData) {
-        return new Response(JSON.stringify(cachedData), {
-            headers: {
-                'Access-Control-Allow-Origin': allowedOrigin,
-                'Content-Type': 'application/json',
-                'Cache-Control': 'public, max-age=31536000',
-            },
-        });
-    }
+    if (!query || query?.action !== 'update') {
+        // KV
+        const cacheKey = `cache:${realm}`;
+        const origin = request.headers.get('Origin');
+        const allowedOrigin = getAllowedOrigin(origin);
+        const cachedData = await env.api.get(cacheKey, { type: 'json' });
+        if (cachedData) {
+            return new Response(JSON.stringify(cachedData), {
+                headers: {
+                    'Access-Control-Allow-Origin': allowedOrigin,
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'public, max-age=31536000',
+                },
+            });
+        }
 
-    // D1
+        // D1
 
-    const values = await readFromD1(env, realm);
-    if (values) {
-        ctx.waitUntil(env.api.put(cacheKey, JSON.stringify(values)));
-        return packResponse(values);
+        const values = await readFromD1(env, realm);
+        if (values) {
+            ctx.waitUntil(env.api.put(cacheKey, JSON.stringify(values)));
+            return packResponse(values);
+        }
     }
 
     // API
