@@ -20,7 +20,9 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     const realm = request.params.realm;
     const query = request.query;
 
-    if (!query || query?.action !== 'update') {
+    let action = query?.action as string;
+
+    if (action !== 'update') {
         // KV
         const cacheKey = `cache:${realm}`;
         const origin = request.headers.get('Origin');
@@ -253,7 +255,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
     const _profile = profile?.profile;
 
-    const success = await saveToD1(env, realm, _meta, _profile);
+    const success = await saveToD1(env, realm, _meta, _profile, action);
 
     return packResponse({
         meta: _meta,
