@@ -33,7 +33,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
                 headers: {
                     'Access-Control-Allow-Origin': allowedOrigin,
                     'Content-Type': 'application/json',
-                    'Cache-Control': 'public, max-age=31536000',
+                    //'Cache-Control': 'public, max-age=31536000',
                 },
             });
         }

@@ -781,19 +781,14 @@ export async function saveToD1(env: Env, realm: string, meta: any, profile: any,
         return success;
     }
 
-    console.log(action);
-
     const exists = await realmExists(env, realm);
     if (!exists) {
-        console.log('exists');
         return await _save();
     } else {
-        console.log('not exists');
         if (action == 'update') {
             _update();
             const cacheKey = `cache:${realm}`;
             await env.api.delete(cacheKey);
-            console.log('update here');
         }
     }
 
