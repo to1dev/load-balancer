@@ -144,7 +144,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
         const _profile = profile?.profile;
 
-        const success = await saveToD1(env, realm, _meta, _profile);
+        const success = await saveToD1(env, realm, _meta, _profile, action);
 
         return packResponse({
             meta: _meta,
@@ -200,7 +200,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
         const _profile = profile?.profile;
 
-        const success = await saveToD1(env, realm, _meta, _profile);
+        const success = await saveToD1(env, realm, _meta, _profile, action);
 
         return packResponse({
             meta: _meta,

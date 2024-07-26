@@ -765,13 +765,31 @@ export async function saveToD1(env: Env, realm: string, meta: any, profile: any,
         return success;
     }
 
-    if (action === 'update') {
-        return await _save();
+    async function _update(): Promise<boolean> {
+        const { success } = await env.MY_DB.prepare(
+            `update realms set
+                RealmOwner = ?1,
+                RealmAvatar = ?2,
+                RealmBanner = ?3,
+                RealmMeta = ?4,
+                RealmProfile = ?5
+             where RealmName = ?6`
+        )
+            .bind(meta?.owner, meta?.image, meta?.banner, JSON.stringify(meta), JSON.stringify(profile), realm)
+            .run();
+
+        return success;
     }
 
     const exists = await realmExists(env, realm);
     if (!exists) {
         return await _save();
+    } else {
+        if (action == 'update') {
+            _update();
+            const cacheKey = `cache:${realm}`;
+            await env.api.delete(cacheKey);
+        }
     }
 
     return false;
