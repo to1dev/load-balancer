@@ -224,7 +224,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     } else {
         if (!banner.includes(PUBLIC_R2_BASE_URL_DOMAIN)) {
             bannerHash = urlToHash(banner);
-            const cachedBanner = await env.MY_BUCKET.head(`images/${imageHash}`);
+            const cachedBanner = await env.MY_BUCKET.head(`images/${bannerHash}`);
             if (cachedBanner) {
                 banner = `${url}${bannerHash}`;
             } else {
