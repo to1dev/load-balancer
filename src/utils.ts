@@ -175,12 +175,9 @@ export async function imageToR2(env: Env, image: string): Promise<string | null>
         const imageBytes = await imageResponse.arrayBuffer();
         if (imageBytes) {
             imageHash = urlToHash(image);
-            console.log(imageHash, 'url to hash');
             await env.MY_BUCKET.put(`images/${imageHash}`, imageBytes);
         }
     }
-
-    console.log('finished r2');
 
     return imageHash;
 }
