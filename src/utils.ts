@@ -253,7 +253,12 @@ export async function fetchApiServer(request: IRequest, path: string, index: num
             randomIndex = index;
         }
         const apiUrl = `${apiServers[randomIndex]}/${path}`;
-        const newRequest = new Request(apiUrl, request);
+        const headers = createHeaders();
+        const newRequest = new Request(apiUrl, {
+            method: 'GET',
+            headers: headers,
+        });
+        //const newRequest = new Request(apiUrl, request);
 
         try {
             const response = await fetch(newRequest);
