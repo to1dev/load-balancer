@@ -15,11 +15,9 @@ import {
 } from '../utils';
 import { IRequest } from 'itty-router';
 import { getAllowedOrigin } from '../utils';
-import punycode from 'punycode/';
 
 export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionContext): Promise<Response> {
-    //const realm = request.params.realm;
-    const realm = punycode.toASCII(request.params.realm).trim().toLowerCase();
+    const realm = request.params.realm;
     const query = request.query;
 
     let action = query?.action as string;
