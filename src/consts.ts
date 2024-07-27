@@ -12,4 +12,4 @@ export const PUBLIC_R2_BASE_URL_DOMAIN = 's1.arc20.me';
 export const PUBLIC_ORD_BASE_URL = 'https://ordinals.com/content/';
 
 export const allowedOrigins = ['https://arc20.me', 'http://localhost:5173'];
-export const apiServers = ['https://ep.wizz.cash/proxy', 'https://ep.atomicalmarket.com/proxy'];
+export const apiServers = ['https://ep.wizz.cash/proxy', 'https://ep.atomicalmarket.com/proxy', 'https://ep.nextdao.xyz/proxy'];
