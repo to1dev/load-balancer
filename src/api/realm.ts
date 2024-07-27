@@ -94,7 +94,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             banner: null,
         };
 
-        const success = await saveToD1(env, realm, _meta, null);
+        //const success = await saveToD1(env, realm, _meta, null);
 
         return packResponse({
             meta: _meta,
@@ -117,7 +117,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             banner: null,
         };
 
-        const success = await saveToD1(env, realm, _meta, null);
+        //const success = await saveToD1(env, realm, _meta, null);
 
         return packResponse({
             meta: _meta,
