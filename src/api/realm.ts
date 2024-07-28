@@ -60,6 +60,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
                     po: null,
                     image: null,
                     banner: null,
+                    background: null,
                 },
                 profile: null,
             });
@@ -74,6 +75,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
                 po: null,
                 image: null,
                 banner: null,
+                background: null,
             },
             profile: null,
         });
@@ -92,6 +94,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             po: null,
             image: null,
             banner: null,
+            background: null,
         };
 
         //const success = await saveToD1(env, realm, _meta, null);
@@ -115,6 +118,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             po: null,
             image: null,
             banner: null,
+            background: null,
         };
 
         //const success = await saveToD1(env, realm, _meta, null);
@@ -140,6 +144,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             po: profile?.owner,
             image: null,
             banner: null,
+            background: null,
         };
 
         const _profile = profile?.profile;
@@ -196,6 +201,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             imageHash: imageHash,
             imageData: imageData,
             banner: null,
+            background: null,
         };
 
         const _profile = profile?.profile;
