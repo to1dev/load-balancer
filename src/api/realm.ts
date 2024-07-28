@@ -127,7 +127,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
     await sendProfileQueue(pid.pid, profile);
 
-    let image = profile?.profile?.image ? profile?.profile?.image : profile?.profile?.i;
+    let image = profile?.profile?.image;
     if (!image) {
         const _meta = {
             v: profile.profile?.v,
@@ -181,7 +181,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         }
     }
 
-    let banner = profile?.profile?.banner ? profile?.profile?.banner : profile?.profile?.b;
+    let banner = profile?.profile?.banner;
     if (!banner) {
         const _meta = {
             v: profile.profile?.v,
@@ -236,6 +236,64 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         }
     }
 
+    let background = profile?.profile?.background;
+    if (!background) {
+        const _meta = {
+            v: profile.profile?.v,
+            id: id.id,
+            number: pid?.number,
+            cid: id.cid,
+            mint: pid?.mintAddress,
+            owner: pid?.address,
+            pid: pid.pid,
+            po: profile?.owner,
+            image: image,
+            imageHash: imageHash,
+            imageData: imageData,
+            banner: banner,
+            bannerHash: bannerHash,
+            bannerData: bannerData,
+            background: null,
+        };
+
+        const _profile = profile?.profile;
+
+        const success = await saveToD1(env, realm, _meta, _profile, action);
+
+        return packResponse({
+            meta: _meta,
+            profile: _profile,
+        });
+    }
+
+    let backgroundData: string | null = null;
+    let backgroundHash: string | null = null;
+    const bkid = parseAtomicalIdfromURN(background);
+    if (bkid?.id) {
+        const cachedBackground = await env.MY_BUCKET.head(`images/${bkid?.id}`);
+        if (cachedBackground) {
+            background = `${url}${bkid?.id}`;
+        } else {
+            const hexBackground = await fetchHexData(request, bkid);
+            if (hexBackground) {
+                backgroundData = await hexToBase64(env, bkid?.id, hexBackground?.data, hexBackground?.bytes, hexBackground.ext);
+            }
+        }
+    } else {
+        if (!background.includes(PUBLIC_R2_BASE_URL_DOMAIN)) {
+            backgroundHash = urlToHash(background);
+            const cachedBackground = await env.MY_BUCKET.head(`images/${backgroundHash}`);
+            if (cachedBackground) {
+                background = `${url}${backgroundHash}`;
+            } else {
+                const backgroundHash = await imageToR2(env, background);
+                if (backgroundHash) {
+                    background = `${url}${backgroundHash}`;
+                }
+            }
+        }
+    }
+
     const _meta = {
         v: profile.profile?.v,
         id: id.id,
@@ -251,6 +309,9 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         banner: banner,
         bannerHash: bannerHash,
         bannerData: bannerData,
+        background: background,
+        backgroundHash: backgroundHash,
+        backgroundData: backgroundData,
     };
 
     const _profile = profile?.profile;
