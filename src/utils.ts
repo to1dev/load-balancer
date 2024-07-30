@@ -393,7 +393,7 @@ export async function fetchRealmProfileIdFastest(request: IRequest, id: string):
 }
 
 export async function fetchRealmProfile(request: IRequest, id: string): Promise<any | null> {
-    const endpoint = PUBLIC_ELECTRUMX_ENDPOINT3;
+    const endpoint = PUBLIC_ELECTRUMX_ENDPOINT5;
     const path: string = `${endpoint}?params=["${id}"]`;
 
     try {
@@ -407,8 +407,8 @@ export async function fetchRealmProfile(request: IRequest, id: string): Promise<
             return null;
         }
 
-        const profile = await findObjectWithKey(data.response?.result?.mint_data?.fields, 'v');
-
+        //const profile = await findObjectWithKey(data.response?.result?.mint_data?.fields, 'v');
+        const profile = data.response?.result?.state?.latest;
         if (!profile) {
             return null;
         }
