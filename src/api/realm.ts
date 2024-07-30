@@ -134,6 +134,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
     const clean: string | null = DOMPurify.sanitize(_profile?.desc) || null;
     const _text = {
+        test: 'test',
         clean: clean,
     };
 
