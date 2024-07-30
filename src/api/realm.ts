@@ -15,7 +15,7 @@ import {
 } from '../utils';
 import { IRequest } from 'itty-router';
 import { getAllowedOrigin } from '../utils';
-import DOMPurify from 'dompurify';
+import DOMPurify from 'isomorphic-dompurify';
 
 export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionContext): Promise<Response> {
     const realm = request.params.realm;
