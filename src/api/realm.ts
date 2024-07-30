@@ -130,13 +130,12 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         });
     }
 
-    const clean: string | null = DOMPurify.sanitize(profile?.desc) || null;
+    const _profile = profile?.profile;
 
+    const clean: string | null = DOMPurify.sanitize(_profile?.desc) || null;
     const _text = {
         clean: clean,
     };
-
-    const _profile = profile?.profile;
 
     await sendProfileQueue(pid.pid, profile);
 
