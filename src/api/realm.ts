@@ -15,7 +15,6 @@ import {
 } from '../utils';
 import { IRequest } from 'itty-router';
 import { getAllowedOrigin } from '../utils';
-import DOMPurify from 'isomorphic-dompurify';
 
 export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionContext): Promise<Response> {
     const realm = request.params.realm;
@@ -132,18 +131,12 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
     const _profile = profile?.profile;
 
-    const clean: string | null = DOMPurify.sanitize(_profile?.desc) || null;
-    const _text = {
-        test: 'test',
-        clean: clean,
-    };
-
     await sendProfileQueue(pid.pid, profile);
 
-    let image = profile?.profile?.image;
+    let image = _profile?.image;
     if (!image) {
         const _meta = {
-            v: profile.profile?.v,
+            v: _profile?.v,
             id: id.id,
             number: pid?.number,
             cid: id.cid,
@@ -162,7 +155,6 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
         return packResponse({
             meta: _meta,
-            text: _text,
             profile: _profile,
         });
     }
@@ -196,10 +188,10 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         }
     }
 
-    let banner = profile?.profile?.banner;
+    let banner = _profile?.banner;
     if (!banner) {
         const _meta = {
-            v: profile.profile?.v,
+            v: _profile?.v,
             id: id.id,
             number: pid?.number,
             cid: id.cid,
@@ -212,7 +204,6 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             imageData: imageData,
             banner: null,
             background: null,
-            clean: clean,
         };
 
         //const _profile = profile?.profile;
@@ -221,7 +212,6 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
         return packResponse({
             meta: _meta,
-            text: _text,
             profile: _profile,
         });
     }
@@ -254,10 +244,10 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         }
     }
 
-    let background = profile?.profile?.background;
+    let background = _profile?.background;
     if (!background) {
         const _meta = {
-            v: profile.profile?.v,
+            v: _profile?.v,
             id: id.id,
             number: pid?.number,
             cid: id.cid,
@@ -272,7 +262,6 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             bannerHash: bannerHash,
             bannerData: bannerData,
             background: null,
-            clean: clean,
         };
 
         //const _profile = profile?.profile;
@@ -281,7 +270,6 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
         return packResponse({
             meta: _meta,
-            text: _text,
             profile: _profile,
         });
     }
@@ -315,7 +303,7 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
     }
 
     const _meta = {
-        v: profile.profile?.v,
+        v: _profile?.v,
         id: id.id,
         number: pid?.number,
         cid: id.cid,
@@ -340,7 +328,6 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
 
     return packResponse({
         meta: _meta,
-        text: _text,
         profile: _profile,
     });
 }
