@@ -15,6 +15,7 @@ import {
 } from '../utils';
 import { IRequest } from 'itty-router';
 import { getAllowedOrigin } from '../utils';
+import DOMPurify from 'dompurify';
 
 export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionContext): Promise<Response> {
     const realm = request.params.realm;
@@ -129,6 +130,14 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         });
     }
 
+    const clean: string | null = DOMPurify.sanitize(profile?.desc) || null;
+
+    const _text = {
+        clean: clean,
+    };
+
+    const _profile = profile?.profile;
+
     await sendProfileQueue(pid.pid, profile);
 
     let image = profile?.profile?.image;
@@ -147,12 +156,13 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             background: null,
         };
 
-        const _profile = profile?.profile;
+        //const _profile = profile?.profile;
 
         const success = await saveToD1(env, realm, _meta, _profile, action);
 
         return packResponse({
             meta: _meta,
+            text: _text,
             profile: _profile,
         });
     }
@@ -202,14 +212,16 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             imageData: imageData,
             banner: null,
             background: null,
+            clean: clean,
         };
 
-        const _profile = profile?.profile;
+        //const _profile = profile?.profile;
 
         const success = await saveToD1(env, realm, _meta, _profile, action);
 
         return packResponse({
             meta: _meta,
+            text: _text,
             profile: _profile,
         });
     }
@@ -260,14 +272,16 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
             bannerHash: bannerHash,
             bannerData: bannerData,
             background: null,
+            clean: clean,
         };
 
-        const _profile = profile?.profile;
+        //const _profile = profile?.profile;
 
         const success = await saveToD1(env, realm, _meta, _profile, action);
 
         return packResponse({
             meta: _meta,
+            text: _text,
             profile: _profile,
         });
     }
@@ -320,12 +334,13 @@ export async function realmHandler(request: IRequest, env: Env, ctx: ExecutionCo
         backgroundData: backgroundData,
     };
 
-    const _profile = profile?.profile;
+    //const _profile = profile?.profile;
 
     const success = await saveToD1(env, realm, _meta, _profile, action);
 
     return packResponse({
         meta: _meta,
+        text: _text,
         profile: _profile,
     });
 }
